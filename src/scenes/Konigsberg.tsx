@@ -10,6 +10,7 @@ import { Html } from '@react-three/drei';
 import { Tree, Waterfalls, Clouds } from './assets/Nature';
 import { RiverBoat } from './assets/RiverBoat';
 import { HumanCharacter } from './assets/HumanCharacter';
+import { PlayerBeacon } from './assets/PlayerBeacon';
 import { Townspeople } from './assets/Townspeople';
 import { House, Cathedral } from './assets/Architecture';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
@@ -217,7 +218,7 @@ function Traveller({
     if (target) {
       const delta = new THREE.Vector3(...target).sub(obj.position);
       const distance = delta.length();
-      const amount = Math.min(dt, 0.035) * 2.8;
+      const amount = Math.min(dt, 0.035) * 4.8;
       if (distance <= amount) {
         obj.position.fromArray(target);
         step.current++;
@@ -252,8 +253,8 @@ function Traveller({
           .multiplyScalar(
             Math.min(dt, 0.035) *
               (keys.current.has('ShiftLeft') || keys.current.has('ShiftRight')
-                ? 3.8
-                : 2.2),
+                ? 6
+                : 3.8),
           );
         const nx = obj.position.x + move.x,
           nz = obj.position.z + move.z;
@@ -289,14 +290,7 @@ function Traveller({
   return (
     <group ref={ref} scale={1.1}>
       <HumanCharacter traveller motion={motion} />
-      <mesh position={[0, 0.018, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-        <ringGeometry args={[0.29, 0.34, 24]} />
-        <meshBasicMaterial color="#ffe1a1" side={THREE.DoubleSide} />
-      </mesh>
-      <mesh position={[0, 1.32, 0]} rotation={[0, 0, Math.PI]}>
-        <coneGeometry args={[0.1, 0.18, 4]} />
-        <meshBasicMaterial color="#ffcf75" />
-      </mesh>
+      <PlayerBeacon />
     </group>
   );
 }
@@ -304,10 +298,12 @@ function Bridge({
   b,
   used,
   onCross,
+  labelVisible,
 }: {
   b: (typeof bridges)[number];
   used: boolean;
   onCross: (id: number) => void;
+  labelVisible: boolean;
 }) {
   const horizontal = b.id === 7;
   const length = horizontal ? b.b[0] - b.a[0] : Math.abs(b.b[2] - b.a[2]);
@@ -350,19 +346,21 @@ function Bridge({
           <Box p={[x * 0.7, -0.28, 0]} s={[0.22, 0.55, 0.36]} c="#807d67" />
         </group>
       ))}
-      <Html position={[0, 0.73, 0]} center zIndexRange={[20, 0]}>
-        <button
-          className={`bridge-marker${used ? ' crossed' : ''}`}
-          title={`${b.name} · ${used ? 'Crossed' : 'Not yet crossed'}`}
-          aria-label={`Cross ${b.name}${used ? ', already crossed' : ''}`}
-          onClick={(e) => {
-            e.stopPropagation();
-            onCross(b.id);
-          }}
-        >
-          {b.id}
-        </button>
-      </Html>
+      {labelVisible && (
+        <Html position={[0, 0.73, 0]} center zIndexRange={[20, 0]}>
+          <button
+            className={`bridge-marker${used ? ' crossed' : ''}`}
+            title={`${b.name} · ${used ? 'Crossed' : 'Not yet crossed'}`}
+            aria-label={`Cross ${b.name}${used ? ', already crossed' : ''}`}
+            onClick={(e) => {
+              e.stopPropagation();
+              onCross(b.id);
+            }}
+          >
+            {b.id}
+          </button>
+        </Html>
+      )}
     </group>
   );
 }
@@ -460,9 +458,9 @@ function CameraControls({
     c.enablePan = true;
     c.minPolarAngle = 0.32;
     c.maxPolarAngle = 1.25;
-    c.minZoom = 16;
+    c.minZoom = 8;
     c.maxZoom = 65;
-    c.zoomSpeed = 0.55;
+    c.zoomSpeed = 1.2;
     c.rotateSpeed = 0.6;
     c.target.set(0, 0, 0);
     controls.current = c;
@@ -472,20 +470,30 @@ function CameraControls({
     };
   }, [camera, gl]);
   useEffect(() => {
+    const compactView = window.matchMedia('(max-width: 850px)').matches;
     camera.position.set(20, 24, -27);
     (camera as THREE.OrthographicCamera).zoom = Math.max(
-      16,
-      Math.min(32, size.width / 31, size.height / 23),
+      8,
+      Math.min(36, size.width / (compactView ? 30 : 31), size.height / 21),
     );
     camera.updateProjectionMatrix();
     controls.current?.target.set(0, 0, 0);
     controls.current?.update();
+    if (compactView && controls.current) {
+      // Pan the framing upward so the city sits lower beneath the title.
+      const offset = new THREE.Vector3(0, 1, 0)
+        .applyQuaternion(camera.quaternion)
+        .multiplyScalar(size.height * 0.075 / (camera as THREE.OrthographicCamera).zoom);
+      camera.position.add(offset);
+      controls.current.target.add(offset);
+      controls.current.update();
+    }
   }, [camera, resetKey, size.width, size.height]);
   useEffect(() => {
     const cam = camera as THREE.OrthographicCamera;
     cam.zoom = THREE.MathUtils.clamp(
-      cam.zoom * Math.pow(1.2, zoomStep - lastZoom.current),
-      16,
+      cam.zoom * Math.pow(1.35, zoomStep - lastZoom.current),
+      8,
       65,
     );
     lastZoom.current = zoomStep;
@@ -514,6 +522,7 @@ export default function Konigsberg({
   playerPosition,
   input,
   paused,
+  labelsVisible,
 }: {
   at: Region;
   used: number[];
@@ -526,6 +535,7 @@ export default function Konigsberg({
   playerPosition: MutableRefObject<Point>;
   input: MutableRefObject<{ x: number; z: number }>;
   paused: boolean;
+  labelsVisible: boolean;
 }) {
   return (
     <Canvas
@@ -561,6 +571,7 @@ export default function Konigsberg({
               b={b}
               used={used.includes(b.id)}
               onCross={onCross}
+              labelVisible={labelsVisible}
             />
           ))}
           <Traveller

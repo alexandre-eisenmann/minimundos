@@ -8,6 +8,6 @@ export const sceneRegistry = [
     title: 'The seven bridges of Königsberg',
     learningObjective:
       'Discover why four odd-degree vertices prevent an Euler walk.',
-    component: () => import('./Konigsberg'),
+    component: () => import('./KonigsbergExperience'),
   },
 ];

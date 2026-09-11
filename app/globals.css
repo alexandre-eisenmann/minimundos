@@ -1,4 +1,53 @@
+@import url('https://fonts.googleapis.com/css2?family=Mystery+Quest&display=swap');
 @import 'tailwindcss';
+.choose-start {
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 50px;
+  padding: 0 15px;
+  border: 1px solid #8da59a60;
+  border-radius: 12px;
+  background: #17333df2;
+  font-size: 13px;
+  box-shadow: 0 8px 25px #091e2926;
+  white-space: nowrap;
+}
+.choose-start svg { color: #efcf95; }
+.choose-start-label { color: #aebfba; }
+.choose-start strong { font-weight: 500; color: #f1eadb; }
+.start-dialog {
+  margin: auto;
+  width: min(420px, calc(100vw - 32px));
+  max-height: calc(100dvh - 32px);
+  overflow-y: auto;
+  padding: 26px;
+  color: #f1eadb;
+  background: #17333d;
+  border: 1px solid #8da59a60;
+  border-radius: 16px;
+  box-shadow: 0 24px 80px #091e2980;
+}
+.start-dialog::backdrop { background: #091e2980; }
+.start-dialog h2 { margin: 0 0 12px; font: 26px Georgia, serif; }
+.start-dialog p { color: #c8d5ce; font-size: 14px; line-height: 1.6; }
+.start-regions { border: 0; padding: 0; margin: 20px 0; display: grid; gap: 8px; }
+.start-regions legend { margin-bottom: 10px; font-size: 12px; color: #dfbb7d; }
+.start-regions label {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  padding: 13px;
+  border: 1px solid #8da59a50;
+  border-radius: 8px;
+  cursor: pointer;
+}
+.start-regions label:has(input:checked) { background: #355159; border-color: #dfbb7d; }
+.start-regions input { accent-color: #dfbb7d; }
+.start-dialog .start-reset-note { font-size: 12px; }
+.start-dialog button { padding: 10px 14px; }
+.start-dialog button[type='submit'] { background: #dfbb7d; color: #17333d; border-radius: 6px; }
 :root {
   font-family: Arial, Helvetica, sans-serif;
   color: #f1eadb;
@@ -17,6 +66,7 @@ body {
 button,
 a {
   -webkit-tap-highlight-color: transparent;
+  color: inherit;
 }
 button {
   font: inherit;
@@ -29,168 +79,169 @@ button:disabled {
 button:focus-visible,
 a:focus-visible {
   outline: 2px solid #ffe0a1;
-  outline-offset: 4px;
+  outline-offset: 3px;
 }
-button {
-  color: inherit;
-}
-a {
-  color: inherit;
+button:hover:not(:disabled):not(.bridge-marker) {
+  background-color: #35535b;
 }
 .game {
   height: 100dvh;
-  min-height: 700px;
   overflow: hidden;
   position: relative;
 }
 .world {
-  /* Contain depth-sorted Three.js HTML labels below the interface overlays. */
   isolation: isolate;
-  z-index: 0;
   position: absolute;
   inset: 0;
+  z-index: 0;
+}
+.world canvas {
+  touch-action: none;
+  outline: none;
 }
 .topbar {
   position: absolute;
-  left: 40px;
-  right: 40px;
-  top: 27px;
+  top: 20px;
+  left: 24px;
+  right: 78px;
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  pointer-events: none;
+}
+.brand {
+  font-family: 'Mystery Quest', Georgia, serif;
+  font-size: 25px;
+  line-height: 1;
+  letter-spacing: 0;
+  color: #efddba;
+}
+.scene-name {
+  border-left: 1px solid #8da59a50;
+  padding-left: 22px;
+  font-size: 13px;
+  color: #c2d0ca;
+}
+.explorer,
+.control-dock {
+  z-index: 5;
+}
+.explorer {
+  position: absolute;
+  top: 76px;
+  right: 20px;
+  width: 320px;
+  background: #17333df2;
+  border: 1px solid #8da59a40;
+  border-radius: 14px;
+  box-shadow: 0 12px 32px #091e2926;
+  overflow: hidden;
+}
+.explorer-heading {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  pointer-events: none;
+  width: 100%;
+  padding: 16px 18px;
+  border: 0;
+  background: transparent;
+  text-align: left;
+  font:
+    20px Georgia,
+    serif;
 }
-.topbar > * {
-  pointer-events: auto;
-}
-.brand {
-  display: flex;
-  align-items: center;
-  gap: 13px;
-  text-decoration: none;
-  color: #efddba;
-  font-family: Georgia, serif;
-  font-size: 24px;
-  letter-spacing: 4px;
-}
-.brand small {
+.explorer-heading small {
   display: block;
-  font: 9px Arial;
-  letter-spacing: 2.1px;
-  color: #a6b9b9;
-  margin-top: 7px;
-}
-.chapter {
-  display: flex;
-  align-items: center;
-  gap: 20px;
-  font-size: 13px;
-  color: #b3c2c0;
-}
-.tiny-label {
-  font-size: 10px;
-  letter-spacing: 2px;
-  color: #d5b77f;
-}
-.icon-button {
-  border: 1px solid #6b858355;
-  background: #193943bb;
-  border-radius: 50%;
-  width: 43px;
-  height: 43px;
-  display: grid;
-  place-items: center;
-}
-.scene-title {
-  position: absolute;
-  top: 131px;
-  left: 42px;
-  pointer-events: none;
-}
-.eyebrow {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 10px;
-  font-weight: 600;
-  letter-spacing: 2px;
-  color: #d2b780;
-}
-.eyebrow > span {
-  width: 5px;
-  height: 5px;
-  background: #dfbb7d;
-  border-radius: 50%;
-}
-h1 {
   font:
-    normal clamp(32px, 3.2vw, 48px)/1.07 Georgia,
-    serif;
-  letter-spacing: -1.4px;
-  margin: 19px 0 15px;
-  text-shadow: 0 2px 20px #17333d;
+    12px Arial,
+    sans-serif;
+  color: #acc0bd;
+  margin-top: 4px;
 }
-.scene-title p {
+.explorer-heading svg {
+  transition: transform 0.2s;
+}
+.explorer-heading .expanded {
+  transform: rotate(180deg);
+}
+.explorer.collapsed {
+  width: 230px;
+}
+.scene-tabs {
+  display: flex;
+  width: calc(100% - 24px);
+  margin: 0 12px;
+  height: 40px !important;
+  background: #102c34;
+  border-radius: 8px;
+  padding: 3px;
+}
+.scene-tabs button {
   font-size: 13px;
-  line-height: 1.8;
-  color: #b7c9c5;
+  min-height: 32px;
+  color: #b9cbc6;
 }
-.challenge {
-  position: absolute;
-  top: 132px;
-  right: 32px;
-  width: 274px;
-  background: linear-gradient(140deg, #173741f0, #142e39ed);
-  border: 1px solid #8da59a38;
-  padding: 23px;
-  border-radius: 4px;
-  box-shadow: 0 15px 60px #091e2930;
+.scene-tabs button[data-active] {
+  background: #355159;
+  color: #f5e3c2;
+  box-shadow: none;
 }
-.challenge h2 {
+.panel-scroll {
+  max-height: calc(100dvh - 230px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: #526c70 transparent;
+}
+.challenge,
+.graph-panel,
+.journal {
+  padding: 10px 18px 18px;
+}
+h1,
+h2 {
   font:
-    normal 30px/1.13 Georgia,
+    normal 23px/1.22 Georgia,
     serif;
-  margin: 15px 0 13px;
+  margin: 8px 0 12px;
+  color: #f0e3c9;
 }
-.challenge > p {
-  font-size: 13px;
-  line-height: 1.65;
-  color: #b7c6c3;
+p {
+  font-size: 14px;
+  line-height: 1.6;
+  color: #bfcec7;
+  margin: 10px 0;
 }
 .progress-heading {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin: 23px 0 12px;
-}
-.progress-heading > span {
-  font-size: 9px;
-  letter-spacing: 1.6px;
-  color: #9eb5b4;
+  margin-top: 20px;
+  font-size: 13px;
+  color: #afc2be;
 }
 .progress-heading strong {
   font-size: 22px;
   font-weight: 400;
-  color: #ecd6ae;
+  color: #e8c990;
 }
-.progress-heading em {
-  font-size: 13px;
-  font-style: normal;
-  color: #7d999c;
+.progress-heading + p {
+  font-size: 12px;
+  margin: 3px 0 10px;
 }
 .bridge-progress {
   display: flex;
-  gap: 6px;
+  gap: 4px;
 }
 .bridge-progress span {
-  height: 27px;
   flex: 1;
   display: grid;
   place-items: center;
+  height: 27px;
   border: 1px solid #6f90905c;
-  color: #92a7a6;
+  color: #aec2bd;
   font-size: 11px;
-  border-radius: 2px;
+  border-radius: 5px;
 }
 .bridge-progress .done {
   color: #1d3a41;
@@ -202,94 +253,188 @@ h1 {
   gap: 7px;
   align-items: center;
   border-top: 1px solid #98aaa22c;
-  padding-top: 17px;
-  margin-top: 21px;
-  font-size: 12px;
+  padding-top: 14px;
+  margin-top: 16px;
+  font-size: 13px;
 }
 .location small {
   margin-left: auto;
-  color: #91aaa9;
-  font-size: 10px;
+  color: #abc1bb;
+  font-size: 12px;
 }
-.location-dot,
-.live-dot {
-  display: inline-block;
+.location-dot {
   width: 5px;
   height: 5px;
   border-radius: 50%;
-  background: #a3bc88;
+  background: #b6cd95;
 }
-.challenge .status {
+.status {
   font-size: 12px;
-  min-height: 39px;
-  margin: 12px 0;
-  color: #bbcac5;
+  margin: 10px 0;
 }
 .route-options {
   display: grid;
   gap: 5px;
 }
 .route-options button {
-  padding: 8px 6px;
+  padding: 9px 10px;
   display: flex;
   align-items: center;
   gap: 8px;
   background: #24444a99;
-  border: 1px solid #6985812b;
-  border-radius: 3px;
-  font-size: 11px;
+  border: 1px solid #69858140;
+  border-radius: 6px;
+  font-size: 13px;
   text-align: left;
 }
 .route-options button > svg {
   margin-left: auto;
   color: #c9b285;
 }
-.route-options button:hover {
-  background: #36575a;
-}
 .route-number {
   color: #e4c080;
-  font-size: 10px;
+  font-size: 12px;
 }
 .walk-actions {
   display: flex;
   justify-content: space-between;
-  margin-top: 15px;
+  margin-top: 10px;
+  gap: 8px;
 }
 .walk-actions button {
   display: flex;
   align-items: center;
   gap: 5px;
-  font-size: 10px;
-  background: none;
-  border: none;
-  padding: 5px 0;
-  color: #aabbb6;
+  font-size: 12px;
+  background: transparent;
+  border: 0;
+  border-radius: 5px;
+  padding: 8px 0;
+  color: #bdccc4;
 }
-.world-controls {
-  position: absolute;
-  bottom: 85px;
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  gap: 8px;
+.start-dialog .walk-actions button {
+  padding: 10px 14px;
 }
-.world-controls button {
+.primary-button {
+  background: #dfbc80;
+  border: 0;
+  border-radius: 6px;
+  padding: 12px;
   display: flex;
   align-items: center;
-  gap: 9px;
+  justify-content: space-between;
+  gap: 10px;
+  color: #253b3b;
+  font-size: 13px;
+  width: 100%;
+  margin-top: 14px;
+}
+.graph-panel svg {
+  width: 100%;
+  max-height: 260px;
+}
+.graph-edge {
+  cursor: pointer;
+}
+.graph-hint {
   font-size: 12px;
-  border: 1px solid #728d8555;
-  background: #16343ddc;
-  border-radius: 4px;
-  padding: 12px 16px;
-  color: #d6d8c9;
+  color: #d7bd89;
 }
-.world-controls .selected {
-  background: #416068;
+.journal strong {
+  color: #eed5a6;
 }
+.degree-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 5px;
+  margin: 16px 0;
+}
+.degree-grid div {
+  text-align: center;
+  background: #27484f;
+  padding: 10px 3px;
+  border-radius: 6px;
+}
+.degree-grid strong {
+  display: block;
+  font: 24px Georgia;
+}
+.degree-grid span {
+  font-size: 12px;
+  color: #b9ccc5;
+}
+.journal h3 {
+  font-size: 14px;
+  margin: 20px 0 10px;
+}
+.start-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.start-options button {
+  background: transparent;
+  border: 1px solid #849b8c66;
+  padding: 8px;
+  font-size: 12px;
+  border-radius: 5px;
+}
+.historical-note {
+  border-top: 1px solid #78998a44;
+  margin-top: 22px;
+  padding-top: 16px;
+}
+.historical-note strong {
+  font: 18px Georgia;
+}
+.historical-note p,
+.historical-note a {
+  font-size: 12px;
+}
+.historical-note a {
+  color: #dbbc87;
+}
+.control-dock {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+.world-controls {
+  display: flex;
+  align-items: center;
+  padding: 5px;
+  gap: 3px;
+  background: #17333df2;
+  border: 1px solid #8da59a45;
+  border-radius: 12px;
+  box-shadow: 0 8px 25px #091e2926;
+}
+.world-controls button {
+  height: 38px;
+  min-width: 38px;
+  padding: 8px 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 13px;
+  background: transparent;
+  border: 0;
+  border-radius: 7px;
+}
+.world-controls button.selected {
+  background: #355159;
+  color: #efcf95;
+}
+.control-divider {
+  height: 21px;
+  width: 1px;
+  background: #8da59a45;
+  margin: 0 3px;
+}
+/* Flag colours track crossing history, independent of the current bank. */
 .bridge-marker {
-  /* Flag colours track crossing history, independent of the current bank. */
   border: 1px solid #ffe6ac;
   background: #f0ca82;
   color: #243d3e;
@@ -298,442 +443,388 @@ h1 {
   width: 25px;
   display: grid;
   place-items: center;
-  font-size: 11px;
+  font-size: 12px;
   box-shadow: 0 2px 5px #132b3c55;
-  transition: background 0.2s;
 }
 .bridge-marker.crossed {
   background: #779487;
   color: #e8e6d0;
 }
-.primary-button {
-  background: #dfbc80;
-  border: 0;
-  border-radius: 3px;
-  padding: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  color: #253b3b;
-  font-size: 12px;
-  width: 100%;
+.scene-error {
+  margin: 25vh 30%;
+  color: #ffe0a1;
+  font-size: 18px;
 }
-.graph-panel {
-  position: absolute;
-  left: 32px;
-  bottom: 85px;
-  width: 300px;
-  background: #17343eef;
-  border: 1px solid #718e8655;
-  border-radius: 4px;
-  padding: 17px;
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition: none !important;
+  }
 }
-.panel-heading {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  font-size: 10px;
-  letter-spacing: 1.8px;
-  color: #b7c7bf;
-}
-.panel-heading button {
-  background: none;
-  border: 0;
-  display: grid;
-  place-items: center;
-}
-.graph-panel p {
-  font-size: 12px;
-  line-height: 1.5;
-  color: #adbfbb;
-  margin: 0;
-}
-.graph-edge {
-  cursor: pointer;
-}
-.journal {
-  position: absolute;
-  right: 0;
-  top: 0;
-  bottom: 0;
-  overflow-y: auto;
-  background: #1c3b43;
-  box-shadow: -15px 0 70px #0d252980;
-  width: 420px;
-  max-width: 100%;
-  padding: 32px;
-  z-index: 10;
-  border-left: 1px solid #8ba49b55;
-}
-.journal > .eyebrow {
-  margin-top: 35px;
-}
-.journal h2 {
-  font:
-    normal 34px/1.15 Georgia,
-    serif;
-  margin: 17px 0 25px;
-}
-.journal p {
-  font-size: 14px;
-  line-height: 1.75;
-  color: #c6d2cb;
-}
-.journal strong {
-  color: #eed5a6;
-}
-.degree-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 5px;
-  margin: 22px 0;
-}
-.degree-grid div {
-  text-align: center;
-  background: #27484f;
-  padding: 13px 3px;
-}
-.degree-grid strong {
+/* The scene shell owns layout independently of the component's utility theme. */
+#scene-panel {
   display: block;
-  font: 28px Georgia;
 }
-.degree-grid span {
-  font-size: 9px;
-  color: #b9ccc5;
+#scene-panel .scene-tabs {
+  width: calc(100% - 24px);
 }
-.journal h3 {
-  font-size: 13px;
-  margin-top: 25px;
-}
-.start-options {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 7px;
-}
-.start-options button {
-  background: transparent;
-  border: 1px solid #849b8c66;
-  padding: 8px;
-  font-size: 11px;
-  border-radius: 3px;
-}
-.historical-note {
-  border-top: 1px solid #78998a44;
-  margin-top: 27px;
-  padding-top: 22px;
-}
-.historical-note strong {
-  font: 18px Georgia;
-}
-.historical-note p {
-  font-size: 12px;
-}
-.historical-note a {
-  font-size: 12px;
-  color: #dbbc87;
-}
-footer {
+
+.scene-title {
   position: absolute;
-  bottom: 25px;
-  left: 40px;
-  right: 40px;
+  top: 105px;
+  left: 32px;
+  pointer-events: none;
+  max-width: calc(100vw - 48px);
+}
+.scene-title h1 {
+  font:
+    normal clamp(30px, 3.2vw, 48px)/1.08 Georgia,
+    serif;
+  letter-spacing: -1px;
+  margin: 0 0 15px;
+  text-shadow: 0 2px 20px #17333d;
+}
+.scene-title p {
+  font-size: 14px;
+  margin: 0;
+  color: #c8d5ce;
+}
+.scene-instruction span {
+  display: block;
+}
+.panel-label {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  color: #91aba9;
-  font-size: 9px;
-  letter-spacing: 1.5px;
+  gap: 9px;
 }
-footer > span:first-child {
+
+/* Anchor secondary tools to the frame, keeping the city clear. */
+.topbar {
+  top: 26px;
+  left: 28px;
+}
+.explorer {
+  top: 18px;
+  right: 24px;
+}
+.explorer.collapsed {
+  width: 40px;
+}
+.explorer.collapsed .explorer-heading {
+  justify-content: center;
+  padding: 10px;
+}
+.explorer.collapsed .panel-label {
+  font-size: 0;
+  gap: 0;
+}
+.explorer.collapsed .explorer-heading > svg {
+  display: none;
+}
+.explorer-heading {
+  min-height: 40px;
+  padding: 10px 14px;
+}
+.scene-title {
+  top: 100px;
+  left: 28px;
+}
+.bridge-tallies {
+  position: absolute;
+  z-index: 4;
+  right: 20px;
+  bottom: 102px;
+  width: min(216px, calc(100vw - 40px));
+  color: #f1eadb;
+  pointer-events: none;
+  transition: opacity 160ms ease, visibility 160ms ease;
+}
+.bridge-tallies.behind-explorer {
+  visibility: hidden;
+  opacity: 0;
+}
+.bridge-tallies-heading {
+  margin-bottom: 8px;
+}
+.bridge-tallies-heading h2 {
+  margin: 0;
+  color: #c9d6d1;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+.bridge-tallies ol {
+  display: grid;
+  gap: 1px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.bridge-tallies li {
+  display: grid;
+  grid-template-columns: 18px minmax(96px, 1fr) 66px;
+  align-items: center;
+  min-height: 23px;
+  font-size: 13px;
+}
+.tally-bridge-number {
+  color: #e4c080;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+.tally-bridge-name {
+  overflow: hidden;
+  color: #d7e0dc;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.tally-marks {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+.tally-group {
+  position: relative;
+  display: flex;
+  gap: 3px;
+  width: 27px;
+  height: 17px;
+  flex: 0 0 auto;
+  transform: rotate(-1deg);
+}
+.tally-group i {
+  display: block;
+  width: 2px;
+  height: 16px;
+  border-radius: 2px;
+  background: #efd39b;
+  box-shadow: 0 1px 2px #0a2630;
+  transform: rotate(2deg);
+}
+.tally-group i:nth-child(even) {
+  transform: translateY(1px) rotate(-2deg);
+}
+.tally-group b {
+  position: absolute;
+  top: 7px;
+  left: -1px;
+  width: 29px;
+  height: 2px;
+  border-radius: 2px;
+  background: #efd39b;
+  box-shadow: 0 1px 2px #0a2630;
+  transform: rotate(-23deg);
+  transform-origin: center;
+}
+.dock-movement-controls {
+  display: flex;
+  align-items: center;
+  gap: 1px;
+}
+.dock-movement-controls button {
+  touch-action: none;
+  user-select: none;
+}
+.dock-movement-controls button:active {
+  background: #9c885d;
+}
+.control-dock {
+  bottom: 24px;
+}
+.control-row {
   display: flex;
   align-items: center;
   gap: 8px;
 }
-footer > div {
-  display: flex;
-  gap: 20px;
-  font-size: 10px;
-  letter-spacing: 0;
-}
-footer > div span {
-  display: flex;
+.topbar, .scene-title { z-index: 1; }
+.topbar { right: 24px; justify-content: space-between; }
+.learn-button {
+  display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
+  min-height: 44px;
+  padding: 10px 14px;
+  border: 1px solid #8da59a60;
+  border-radius: 12px;
+  background: #17333df2;
+  color: #efddba;
+  font-size: 14px;
+  pointer-events: auto;
+  flex-shrink: 0;
 }
-.scene-error {
-  margin: 250px 30%;
-  color: #ffe0a1;
-  font-size: 18px;
+
+@media (min-width: 851px) and (pointer: coarse) {
+  .control-dock { left: auto; right: 24px; transform: none; }
+  .control-row { align-items: flex-end; flex-direction: column; }
+  .choose-start { height: 42px; padding: 0 12px; }
 }
-.selected {
-  color: #ecc985;
-}
-@media (min-width: 1400px) {
-  .world {
-    right: 140px;
-    left: 20px;
-  }
-}
-@media (max-width: 1000px) {
-  .chapter {
-    display: none;
-  }
-  .scene-title {
-    top: 112px;
-    left: 24px;
-  }
-  .scene-title h1 {
-    font-size: 32px;
-  }
-  .challenge {
-    right: 20px;
-    top: 112px;
-    width: 230px;
-    padding: 17px;
-  }
-  .challenge h2 {
-    font-size: 25px;
-  }
-  .world {
-    left: -80px;
-    right: 100px;
-  }
-  .topbar {
-    left: 24px;
-    right: 24px;
-  }
-  .coordinates {
-    display: none;
-  }
-  footer {
-    left: 24px;
-    right: 24px;
-  }
-}
-@media (max-width: 700px) {
+
+
+
+
+/* The title and city share a mobile stage; controls and panels follow below. */
+@media (max-width: 850px) {
+  /* Keep swipe scrolling to the controls without a scrollbar over the scene. */
+  html:has(.game), body:has(.game) { scrollbar-width: none; }
+  html:has(.game)::-webkit-scrollbar,
+  body:has(.game)::-webkit-scrollbar { display: none; }
   .game {
-    min-height: 850px;
-    height: 100dvh;
-    overflow: auto;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto auto auto;
+    height: auto;
+    min-height: 100svh;
+    overflow: visible;
+    gap: 16px;
+    padding: max(20px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) max(24px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
   }
-  .topbar {
-    top: 20px;
-  }
-  .brand {
-    font-size: 20px;
-  }
-  .brand small {
-    font-size: 8px;
-  }
-  .scene-title {
-    top: 92px;
-  }
-  .scene-title h1 {
-    font-size: 29px;
-    margin-top: 12px;
-  }
-  .scene-title p {
-    display: none;
-  }
-  .world {
-    top: 90px;
-    left: -90px;
-    right: -90px;
-    bottom: 240px;
-  }
-  .challenge {
-    top: auto;
-    bottom: 54px;
-    left: 16px;
-    right: 16px;
-    width: auto;
-    padding: 15px 18px;
-    max-height: 285px;
-    overflow: auto;
-  }
-  .challenge h2 {
-    font-size: 23px;
-    margin: 9px 0;
-  }
-  .challenge h2 br {
-    display: none;
-  }
-  .challenge > p:not(.status) {
-    margin: 6px 0;
-    font-size: 12px;
-  }
-  .challenge .eyebrow {
-    font-size: 9px;
-  }
-  .progress-heading {
-    position: absolute;
-    right: 18px;
-    top: 15px;
-    margin: 0;
-    gap: 10px;
-  }
-  .progress-heading > span {
-    display: none;
-  }
-  .bridge-progress {
-    position: absolute;
-    right: 18px;
-    top: 53px;
-    width: 135px;
-    gap: 3px;
-  }
-  .bridge-progress span {
-    height: 21px;
-    font-size: 9px;
-  }
-  .location {
-    margin-top: 9px;
-    padding-top: 9px;
-  }
-  .challenge .status {
-    min-height: 0;
-    margin: 8px 0;
-  }
-  .route-options {
-    display: flex;
-    flex-wrap: wrap;
-  }
-  .route-options button {
-    flex: 1;
-    min-width: 100px;
-    font-size: 10px;
-  }
-  .walk-actions {
-    margin-top: 8px;
-  }
-  .world-controls {
-    bottom: 352px;
-    white-space: nowrap;
-  }
-  .world-controls button {
-    font-size: 10px;
-    padding: 9px;
-  }
-  .graph-panel {
-    left: 16px;
-    bottom: 355px;
-    width: 230px;
-  }
-  .graph-panel svg {
-    max-height: 170px;
-  }
-  footer {
-    bottom: 19px;
-    font-size: 8px;
-    left: 20px;
-    right: 20px;
-  }
-  footer > div {
-    display: none;
-  }
-  .journal {
+  .game > * { min-width: 0; grid-column: 1; }
+  .topbar, .scene-title, .world, .control-dock, .bridge-tallies, .explorer {
+    position: relative;
+    inset: auto;
     width: 100%;
-    padding: 25px;
-  }
-  .journal p {
-    font-size: 16px;
-  }
-}
-/* Keep the canvas contained: camera input must never scroll the page. */
-.world canvas {
-  touch-action: none;
-  outline: none;
-}
-.walking-pad {
-  position: absolute;
-  left: 38px;
-  bottom: 90px;
-  display: grid;
-  grid-template-columns: repeat(3, 36px);
-  gap: 5px;
-  z-index: 3;
-}
-.walking-pad button {
-  border: 1px solid #8da59a66;
-  background: #193943d9;
-  border-radius: 5px;
-  font-size: 18px;
-  height: 36px;
-  touch-action: none;
-  user-select: none;
-}
-.walking-pad button:first-child {
-  grid-column: 2;
-}
-.walking-pad button:nth-child(2) {
-  grid-column: 1;
-}
-.walking-pad button:active {
-  background: #9c885d;
-}
-.bridge-marker {
-  width: 25px;
-  height: 25px;
-  font-size: 12px;
-}
-.game .world-controls {
-  z-index: 3;
-}
-.graph-panel {
-  z-index: 4;
-}
-.challenge {
-  z-index: 3;
-}
-.scene-title {
-  z-index: 2;
-}
-.topbar {
-  z-index: 4;
-}
-@media (max-width: 700px) {
-  .walking-pad {
-    bottom: 360px;
-    left: 20px;
-    grid-template-columns: repeat(3, 32px);
-  }
-  .walking-pad button {
-    height: 32px;
-  }
-  .world-controls {
-    left: auto;
-    right: 16px;
+    max-width: none;
     transform: none;
-    bottom: 362px;
   }
-  .world-controls button span {
-    display: none;
+  .topbar {
+    grid-row: 1;
+    align-self: start;
+    justify-content: space-between;
+    gap: 12px;
+    isolation: isolate;
   }
-  .world {
-    left: 0;
-    right: 0;
-    top: 170px;
-    bottom: 335px;
+  .topbar::before {
+    content: '';
+    position: absolute;
+    z-index: -1;
+    top: calc(-1 * max(20px, env(safe-area-inset-top)));
+    bottom: -8px;
+    left: calc(-1 * max(16px, env(safe-area-inset-left)));
+    right: calc(-1 * max(16px, env(safe-area-inset-right)));
+    background: #17333d40;
+    backdrop-filter: blur(3px);
+    pointer-events: none;
   }
-  .scene-title h1 {
-    font-size: 27px;
+  .learn-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 44px;
+    padding: 10px 12px;
+    border: 1px solid #8da59a60;
+    border-radius: 12px;
+    background: transparent;
+    color: #efddba;
+    font-size: 14px;
+    pointer-events: auto;
+    flex-shrink: 0;
   }
-  .game {
-    height: 100dvh;
-    min-height: 720px;
-  }
-  .graph-panel {
-    left: 20px;
-    bottom: 405px;
-  }
-  .challenge {
-    max-height: 290px;
-  }
-  .challenge .progress-heading {
-    top: 15px;
-  }
+  .explorer-heading { scroll-margin-top: 16px; }
+  .brand { font-size: 24px; }
   .scene-title {
-    top: 90px;
+    grid-area: 1 / 1;
+    margin-top: 60px;
+    align-self: start;
+    background: transparent;
+    pointer-events: none;
   }
+  .scene-title * { pointer-events: none; }
+  .scene-title h1 {
+    font-size: clamp(28px, 5vw, 38px);
+    line-height: 1.12;
+    letter-spacing: -0.5px;
+    margin: 0 0 8px;
+  }
+  .scene-title p { font-size: 14px; line-height: 1.5; text-shadow: 0 1px 8px #17333d; }
+  .scene-instruction span { display: block; }
+  .world {
+    grid-area: 1 / 1;
+    height: calc(clamp(400px, 56svh, 600px) + 60px + max(20px, env(safe-area-inset-top)));
+    margin-top: calc(-1 * max(20px, env(safe-area-inset-top)));
+    width: calc(100% + max(16px, env(safe-area-inset-left)) + max(16px, env(safe-area-inset-right)));
+    margin-left: calc(-1 * max(16px, env(safe-area-inset-left)));
+    overflow: hidden;
+  }
+  .control-dock { grid-row: 2; }
+  .control-row { flex-direction: column; align-items: stretch; gap: 10px; }
+  .choose-start { width: 100%; height: auto; min-height: 48px; padding: 12px 16px; font-size: 14px; white-space: normal; }
+  .choose-start strong { margin-left: auto; text-align: right; }
+  .world-controls { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 4px; padding: 8px; }
+  .dock-movement-controls { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 4px; padding-bottom: 8px; margin-bottom: 4px; border-bottom: 1px solid #8da59a40; }
+  .world-controls button { min-width: 44px; min-height: 44px; height: 44px; background: #24444a99; }
+  .control-divider { display: none; }
+  .bridge-tallies, .explorer { border: 1px solid #8da59a40; border-radius: 14px; background: #1c3b44; box-shadow: none; }
+  .bridge-tallies { grid-row: 3; padding: 18px; pointer-events: auto; }
+  .bridge-tallies.behind-explorer { visibility: visible; opacity: 1; }
+  .bridge-tallies-heading { margin-bottom: 12px; }
+  .bridge-tallies-heading h2 { font-size: 12px; }
+  .bridge-tallies li { grid-template-columns: 24px minmax(0, 1fr) minmax(66px, auto); gap: 8px; min-height: 34px; font-size: 14px; border-bottom: 1px solid #8da59a20; }
+  .bridge-tallies li:last-child { border-bottom: 0; }
+  .tally-bridge-name { display: block; white-space: normal; overflow: visible; }
+  .tally-marks { flex-wrap: wrap; max-width: 100px; padding-block: 4px; }
+  .explorer, .explorer.collapsed { order: 5; width: 100%; }
+  .explorer-heading, .explorer.collapsed .explorer-heading { justify-content: space-between; min-height: 56px; padding: 16px; font-size: 18px; }
+  .explorer.collapsed .panel-label { font-size: inherit; gap: 9px; }
+  .explorer.collapsed .explorer-heading > svg { display: block; }
+  .panel-scroll { max-height: none; overflow: visible; }
+  .scene-tabs { height: auto !important; min-height: 48px; }
+  .scene-tabs button { min-height: 44px; font-size: 14px; }
+  .challenge, .graph-panel, .journal { padding: 16px; }
+  .explorer p, .historical-note p, .historical-note a { font-size: 16px; }
+  .route-options button, .walk-actions button, .start-options button { min-height: 44px; font-size: 14px; }
+  .walk-actions { flex-wrap: wrap; }
+  .location { flex-wrap: wrap; font-size: 14px; }
+  .bridge-progress { flex-wrap: wrap; }
+  .bridge-progress span { min-width: 32px; font-size: 12px; }
+  .scene-error { margin: 24px; font-size: 16px; }
+}
+
+/* The native modal supplies focus containment, Escape and focus restoration. */
+.learn-dialog {
+  position: fixed;
+  inset: 0;
+  margin: auto;
+  width: min(680px, calc(100vw - 48px));
+  max-width: none;
+  max-height: calc(100dvh - 48px);
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid #8da59a60;
+  border-radius: 20px;
+  color: #f1eadb;
+  background: #17333d;
+  box-shadow: 0 24px 80px #091e2980;
+}
+.learn-dialog[open] { display: flex; flex-direction: column; }
+.learn-dialog::backdrop { background: #071c26b8; backdrop-filter: blur(5px); }
+.learn-dialog-header { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 20px 24px 12px; flex: none; }
+.learn-dialog-header h2 { display: flex; align-items: center; gap: 12px; margin: 0; font-size: 25px; }
+.learn-dialog-header h2 svg { flex-shrink: 0; color: #dfbb7d; }
+.learn-close { display: grid; place-items: center; width: 44px; height: 44px; flex: none; background: #24444a; border: 1px solid #8da59a40; border-radius: 10px; }
+.learn-dialog #scene-panel { display: flex; flex-direction: column; min-height: 0; overflow: hidden; }
+.learn-dialog .scene-tabs { flex: none; min-height: 48px; height: auto !important; }
+.learn-dialog .scene-tabs button { min-height: 42px; font-size: 14px; }
+.learn-dialog .panel-scroll { min-height: 0; max-height: none; overflow-y: auto; overscroll-behavior: contain; }
+.learn-dialog .challenge, .learn-dialog .graph-panel, .learn-dialog .journal { padding: 20px 24px 28px; }
+.learn-dialog p, .learn-dialog .historical-note a { font-size: 16px; }
+.learn-dialog .graph-panel svg { max-height: 340px; }
+@media (max-width: 850px) {
+  .learn-dialog { width: calc(100vw - 24px); max-height: calc(100dvh - 24px); border-radius: 16px; }
+  .learn-dialog-header { padding: 16px 16px 12px; gap: 8px; }
+  .learn-dialog-header h2 { font-size: 21px; gap: 8px; }
+  .learn-dialog .challenge, .learn-dialog .graph-panel, .learn-dialog .journal { padding: 16px; }
+}
+
+@media (min-width: 851px) {
+  .learn-dialog { inset: 84px 24px auto auto; margin: 0; width: 380px; max-height: calc(100dvh - 108px); z-index: 10; border-radius: 14px; }
+  .learn-dialog-header { padding: 12px 16px; gap: 8px; }
+  .learn-dialog-header h2 { font-size: 20px; gap: 8px; }
+  .learn-dialog .challenge, .learn-dialog .graph-panel, .learn-dialog .journal { padding: 16px; }
 }
