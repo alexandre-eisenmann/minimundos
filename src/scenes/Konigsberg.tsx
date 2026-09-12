@@ -174,9 +174,11 @@ function Traveller({
     if (!soundEnabled) return;
     const unlock = () => footsteps.unlock();
     window.addEventListener('pointerdown', unlock, { capture: true });
+    window.addEventListener('touchstart', unlock, { capture: true, passive: true });
     window.addEventListener('keydown', unlock, { capture: true });
     return () => {
       window.removeEventListener('pointerdown', unlock, { capture: true });
+      window.removeEventListener('touchstart', unlock, { capture: true });
       window.removeEventListener('keydown', unlock, { capture: true });
     };
   }, [footsteps, soundEnabled]);

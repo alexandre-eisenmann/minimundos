@@ -45,10 +45,24 @@ export class FootstepPlayer {
   private lastGaitPhase = 0;
   private alternatingStep = 1;
   private unavailable = false;
+  private primed = false;
 
   unlock() {
     const context = this.ensureContext();
-    if (context?.state === 'suspended') void context.resume().catch(() => {});
+    if (!context) return;
+
+    // Mobile Safari needs a source started inside the first touch gesture,
+    // even when the AudioContext is also resumed during that gesture.
+    if (!this.primed) {
+      const silence = context.createBuffer(1, 1, context.sampleRate);
+      const source = context.createBufferSource();
+      source.buffer = silence;
+      source.connect(context.destination);
+      source.start();
+      this.primed = true;
+    }
+
+    if (context.state === 'suspended') void context.resume().catch(() => {});
   }
 
   update(time: number, walking: boolean, onBridge: boolean) {
