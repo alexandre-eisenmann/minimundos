@@ -1,0 +1,14 @@
+[
+  {
+    "slug": "konigsberg",
+    "path": "/scenes/konigsberg",
+    "title": "The seven bridges of Königsberg",
+    "learningObjective": "Discover why four odd-degree vertices prevent an Euler walk.",
+    "social": {
+      "title": "MiniMundos · The Seven Bridges of Königsberg",
+      "description": "Can you cross every bridge exactly once? Enter a tiny historical world and discover the idea that began graph theory.",
+      "image": "/minimundos-social-card.png",
+      "imageAlt": "MiniMundos miniature map of Königsberg, with seven bridges connecting four areas of land."
+    }
+  }
+]

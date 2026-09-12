@@ -1,13 +1,14 @@
 import { sceneDefinition } from '../game/world';
+import sceneManifest from './manifest.json';
+
+const konigsberg = sceneManifest.find((scene) => scene.slug === 'konigsberg');
+if (!konigsberg) throw new Error('Königsberg scene metadata is missing');
+
 /** Each scene can be developed and linked independently before an atlas exists. */
 export const sceneRegistry = [
   {
     ...sceneDefinition,
-    slug: 'konigsberg',
-    path: '/scenes/konigsberg',
-    title: 'The seven bridges of Königsberg',
-    learningObjective:
-      'Discover why four odd-degree vertices prevent an Euler walk.',
+    ...konigsberg,
     component: () => import('./KonigsbergExperience'),
   },
 ];
