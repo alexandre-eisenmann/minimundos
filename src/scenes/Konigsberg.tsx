@@ -155,6 +155,7 @@ function Traveller({
   input,
   paused,
   soundEnabled,
+  footsteps,
 }: {
   journey: Journey;
   onArrive: () => void;
@@ -165,23 +166,10 @@ function Traveller({
   input: MutableRefObject<MovementInput>;
   paused: boolean;
   soundEnabled: boolean;
+  footsteps: FootstepPlayer;
 }) {
   const ref = useRef<THREE.Group>(null);
   const motion = useRef(0);
-  const footsteps = useMemo(() => new FootstepPlayer(), []);
-  useEffect(() => () => footsteps.dispose(), [footsteps]);
-  useEffect(() => {
-    if (!soundEnabled) return;
-    const unlock = () => footsteps.unlock();
-    window.addEventListener('pointerdown', unlock, { capture: true });
-    window.addEventListener('touchstart', unlock, { capture: true, passive: true });
-    window.addEventListener('keydown', unlock, { capture: true });
-    return () => {
-      window.removeEventListener('pointerdown', unlock, { capture: true });
-      window.removeEventListener('touchstart', unlock, { capture: true });
-      window.removeEventListener('keydown', unlock, { capture: true });
-    };
-  }, [footsteps, soundEnabled]);
   const step = useRef(0),
     key = useRef(-1),
     bridge = useRef<number | null>(null),
@@ -509,6 +497,7 @@ export default function Konigsberg({
   paused,
   labelsVisible,
   soundEnabled,
+  footsteps,
 }: {
   at: Region;
   used: number[];
@@ -523,6 +512,7 @@ export default function Konigsberg({
   paused: boolean;
   labelsVisible: boolean;
   soundEnabled: boolean;
+  footsteps: FootstepPlayer;
 }) {
   return (
     <Canvas
@@ -571,6 +561,7 @@ export default function Konigsberg({
             input={input}
             paused={paused}
             soundEnabled={soundEnabled}
+            footsteps={footsteps}
           />
         </group>
       </Suspense>

@@ -5,6 +5,8 @@ import {
   useState,
   useCallback,
   useEffect,
+  useLayoutEffect,
+  useMemo,
   useRef,
   Component,
   type ReactNode,
@@ -39,7 +41,7 @@ import {
   type Region,
   type Point,
 } from '../game/world';
-import { useSoundPreference } from '../game/sound';
+import { FootstepPlayer, useSoundPreference } from '../game/sound';
 class SceneBoundary extends Component<
   { children: ReactNode },
   { error: boolean }
@@ -165,6 +167,21 @@ function TallyMarks({ count }: { count: number }) {
 
 export default function KonigsbergExperience() {
   const [soundEnabled, setSoundEnabled] = useSoundPreference();
+  const footsteps = useMemo(() => new FootstepPlayer(), []);
+  useLayoutEffect(() => {
+    if (!soundEnabled) return;
+    footsteps.prepare();
+    const unlock = () => footsteps.unlock();
+    window.addEventListener('pointerdown', unlock, { capture: true });
+    window.addEventListener('touchstart', unlock, { capture: true, passive: true });
+    window.addEventListener('keydown', unlock, { capture: true });
+    return () => {
+      window.removeEventListener('pointerdown', unlock, { capture: true });
+      window.removeEventListener('touchstart', unlock, { capture: true });
+      window.removeEventListener('keydown', unlock, { capture: true });
+    };
+  }, [footsteps, soundEnabled]);
+  useEffect(() => () => footsteps.dispose(), [footsteps]);
   const [start, setStart] = useState<Region>('south');
   const [draftStart, setDraftStart] = useState<Region>('south');
   const startDialog = useRef<HTMLDialogElement>(null);
@@ -461,6 +478,7 @@ export default function KonigsbergExperience() {
             paused={choosingStart || (panelOpen && compactView)}
             labelsVisible={labelsVisible}
             soundEnabled={soundEnabled}
+            footsteps={footsteps}
           />
         </SceneBoundary>
         <MovementJoystick input={input} disabled={moving || choosingStart || (panelOpen && compactView)} />
