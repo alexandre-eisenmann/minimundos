@@ -81,7 +81,7 @@ export default function MovementJoystick({ input, disabled }: {
         <span className="joystick-axis" aria-hidden="true" />
         <span className="joystick-thumb" aria-hidden="true" style={{ transform: `translate(calc(-50% + ${thumb.x * 30}cqw), calc(-50% + ${thumb.z * 30}cqw))` }} />
       </div>
-      <span id="joystick-help" className="joystick-help"><span className="joystick-touch-hint">Drag to walk</span><span className="joystick-key-hint">↑ ↓ ← → / WASD</span></span>
+      <span id="joystick-help" className="joystick-help">Drag to walk. You can also use the arrow keys or W, A, S, D.</span>
     </div>
   );
 }

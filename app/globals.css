@@ -858,13 +858,14 @@ p {
   box-shadow: 0 4px 9px #061e2866, inset 0 1px 2px #fff0c8aa;
   pointer-events: none;
 }
-.joystick-help { font-size: 10px; letter-spacing: .04em; text-shadow: 0 1px 4px #102b34; }
-.joystick-touch-hint { display: none; }
+/* Keep instructions accessible without adding visual clutter below the stick. */
+.joystick-help {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0;
+}
 .movement-joystick[data-disabled="true"] { opacity: .4; pointer-events: none; }
 @media (pointer: coarse) {
   .joystick-surface { width: 128px; }
-  .joystick-key-hint { display: none; }
-  .joystick-touch-hint { display: inline; }
 }
 @media (max-width: 850px) {
   .world { position: relative; }
@@ -875,3 +876,72 @@ p {
   .movement-joystick { bottom: max(12px, env(safe-area-inset-bottom)); }
   .joystick-surface { width: 104px; }
 }
+
+/* Compact scene HUD: actions above, a single crossing strip below. */
+.topbar-actions { display: flex; align-items: center; gap: 8px; pointer-events: auto; }
+.compact-control {
+  display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+  min-width: 44px; min-height: 44px; padding: 9px 11px;
+  border: 1px solid #a9b5bc55; border-radius: 12px;
+  background: #18242cc9; color: #e1e6eb; font-size: 13px;
+}
+.compact-control[aria-pressed="true"] { background: #455360; }
+.scene-title-hidden { visibility: hidden; pointer-events: none; }
+.game .movement-joystick { left: auto; right: max(24px, env(safe-area-inset-right)); bottom: max(72px, env(safe-area-inset-bottom)); color: #e1e5ee; }
+.joystick-surface {
+  border-color: #d8dce680;
+  background: radial-gradient(circle, #75808f66, #292c388c);
+  box-shadow: inset 0 0 0 8px #dce3ed08, 0 0 14px #dce7ff22, 0 0 30px #b8caff16, 0 5px 20px #11131b33;
+}
+.joystick-thumb {
+  border-color: #f0f2f7cc;
+  background: radial-gradient(circle at 35% 25%, #f0f2f7, #9aa5b8);
+  box-shadow: 0 0 16px #e4ecff40, 0 4px 10px #11131b66, inset 0 1px 3px #ffffffaa;
+}
+.joystick-surface:focus-visible { outline: 1px solid #e1e5f1; outline-offset: 4px; }
+/* Single-line crossing ledger, scrolling only when its content overflows. */
+.game .bridge-tallies {
+  position: absolute; top: auto; right: 0; left: 0; bottom: 0;
+  transform: none; width: 100%; max-width: none; margin: 0;
+  padding: 0 max(10px, env(safe-area-inset-right)) env(safe-area-inset-bottom) max(10px, env(safe-area-inset-left));
+  background: #18242cdb; border: 0; border-top: 1px solid #a9b5bc33;
+  border-radius: 0; box-shadow: none; pointer-events: auto;
+  display: flex; align-items: center; overflow: hidden;
+}
+.game .bridge-tallies:focus-visible { outline: 1px solid #e1e5f1; outline-offset: -2px; }
+.game .bridge-tallies ol { display: flex; width: max-content; min-width: 100%; gap: 0; }
+.game .bridge-tallies li {
+  display: flex; flex: 1 0 auto; align-items: center; gap: 6px;
+  min-height: 30px; padding: 0 12px; border: 0; border-right: 1px solid #a9b5bc22;
+  font-size: 11px; white-space: nowrap;
+}
+.game .bridge-tallies li:first-child { padding-left: 0; }
+.game .bridge-tallies li:last-child { border: 0; padding-right: 0; }
+.game .tally-bridge-number { font-size: 11px; color: #f1d5a0; }
+.game .tally-bridge-name { display: inline; white-space: nowrap; overflow: visible; }
+.game .tally-marks { flex-wrap: nowrap; max-width: none; min-width: 8px; padding: 0; gap: 5px; }
+.game .tally-group { flex-shrink: 0; }
+@media (max-width: 850px) {
+  .topbar-actions { gap: 5px; }
+  .compact-control { padding: 8px; }
+  .compact-control span { display: none; }
+  .game .movement-joystick { right: max(20px, env(safe-area-inset-right)); bottom: 68px; }
+}
+@media (max-height: 500px) and (orientation: landscape) {
+  .game .movement-joystick { bottom: calc(40px + env(safe-area-inset-bottom)); }
+}
+@media (max-width: 850px) {
+  .game { grid-template-rows: auto; gap: 0; padding-bottom: 0; }
+  .game .world { height: 100svh; min-height: 320px; }
+}
+@media (max-width: 360px) {
+  .topbar-actions .learn-button span { display: none; }
+}
+
+.game .tally-viewport { flex: 1; min-width: 0; overflow-x: auto; scrollbar-width: none; touch-action: pan-x; }
+.tally-viewport::-webkit-scrollbar { display: none; }
+.tally-viewport:focus-visible { outline: 1px solid #e1e5f1; outline-offset: -2px; }
+.tally-track { display: flex; width: 100%; }
+.game .tally-track ol { flex: 0 0 auto; width: max-content; min-width: 100%; }
+.game .tally-track li:first-child, .game .tally-track li:last-child { padding: 0 12px; }
+.game .tally-pause { display: grid; place-items: center; flex: 0 0 30px; height: 30px; padding: 0; border: 0; border-left: 1px solid #a9b5bc33; border-radius: 0; background: transparent; color: #dce3eb; }

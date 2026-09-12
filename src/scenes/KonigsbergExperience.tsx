@@ -1,3 +1,4 @@
+import TallyMarquee from './assets/TallyMarquee';
 import MovementJoystick from './assets/MovementJoystick';
 import type { MovementInput } from '../game/movement';
 import {
@@ -17,8 +18,6 @@ import {
   Eye,
   EyeOff,
   X,
-  Plus,
-  Minus,
   Footprints,
   MapPin,
 } from 'lucide-react';
@@ -202,7 +201,6 @@ export default function KonigsbergExperience() {
     return () => { document.body.style.overflow = previousOverflow; };
   }, [panelOpen, compactView]);
   const [resetKey, setResetKey] = useState(0);
-  const [zoomStep, setZoomStep] = useState(0);
   const [journey, setJourney] = useState<Journey>({
     points: [regions.south.position],
     key: 0,
@@ -275,6 +273,7 @@ export default function KonigsbergExperience() {
   }
   function restart(origin: Region = start) {
     pendingCrossing.current = null;
+    setResetKey((key) => key + 1);
     setStart(origin);
     setAt(origin);
     setUsed([]);
@@ -397,6 +396,15 @@ export default function KonigsbergExperience() {
       </dialog>
       <header className="topbar">
             <a className="brand" href={import.meta.env.BASE_URL} aria-label="MiniMundos — all worlds">MiniMundos</a>
+            <div className="topbar-actions">
+              <button className="compact-control" onClick={chooseStart} aria-label="New walk — choose starting point" title="New walk">
+                <RotateCcw size={18} /><span>New walk</span>
+              </button>
+              <button className="compact-control visibility-control" onClick={() => setLabelsVisible((visible) => !visible)}
+                aria-label={labelsVisible ? 'Hide title and bridge numbers' : 'Show title and bridge numbers'}
+                aria-pressed={!labelsVisible} title={labelsVisible ? 'Hide title and bridge numbers' : 'Show title and bridge numbers'}>
+                {labelsVisible ? <EyeOff size={19} /> : <Eye size={19} />}
+              </button>
             <button
               className="learn-button"
               aria-label="Learn about the seven bridges"
@@ -408,9 +416,10 @@ export default function KonigsbergExperience() {
               <BookOpen size={20} aria-hidden="true" />
               <span>Learn</span>
             </button>
+            </div>
           </header>
           <section
-            className="scene-title"
+            className={`scene-title${labelsVisible ? "" : " scene-title-hidden"}`}
             aria-label="The seven bridges of Königsberg"
           >
             <h1>
@@ -432,7 +441,7 @@ export default function KonigsbergExperience() {
             journey={journey}
             onArrive={onArrive}
             resetKey={resetKey}
-            zoomStep={zoomStep}
+            zoomStep={0}
             onManualCross={onManualCross}
             playerPosition={playerPosition}
             input={input}
@@ -441,71 +450,13 @@ export default function KonigsbergExperience() {
           />
         </SceneBoundary>
         <MovementJoystick input={input} disabled={moving || choosingStart || (panelOpen && compactView)} />
-      </div>
-          <div className="control-dock">
-            <div className="control-row">
-              <button
-                className="choose-start"
-                onClick={chooseStart}
-                aria-label={`Choose starting point. Current start: ${regions[start].name}`}
-                title="Choose starting point"
-              >
-                <MapPin size={16} />
-                <span className="choose-start-label">Start</span>
-                <strong>{regions[start].name}</strong>
-              </button>
-              <div
-                className="world-controls"
-                role="toolbar"
-                aria-label="Scene controls"
-              >
-                <button
-                  onClick={() => setLabelsVisible((visible) => !visible)}
-                  aria-label={labelsVisible ? 'Hide bridge labels' : 'Show bridge labels'}
-                  aria-pressed={labelsVisible}
-                  title={labelsVisible ? 'Hide bridge labels' : 'Show bridge labels'}
-                  className={labelsVisible ? 'selected' : ''}
-                >
-                  {labelsVisible ? <EyeOff size={18} /> : <Eye size={18} />}
-                </button>
-                <span className="control-divider" />
-                <button
-                  onClick={() => setZoomStep((k) => k - 1)}
-                  aria-label="Zoom out"
-                  title="Zoom out"
-                >
-                  <Minus size={18} />
-                </button>
-                <button
-                  onClick={() => setZoomStep((k) => k + 1)}
-                  aria-label="Zoom in"
-                  title="Zoom in"
-                >
-                  <Plus size={18} />
-                </button>
-                <button
-                  onClick={() => setResetKey((k) => k + 1)}
-                  aria-label="Reset camera"
-                  title="Reset camera"
-                >
-                  <RotateCcw size={17} />
-                </button>
-              </div>
-            </div>
-          </div>
-          <aside
-            className="bridge-tallies"
-            aria-labelledby="bridge-tallies-title"
-          >
-            <div className="bridge-tallies-heading">
-              <h2 id="bridge-tallies-title">Crossings</h2>
-            </div>
-            <ol>
+          <TallyMarquee>
               {bridges.map((bridge) => {
                 const count = used.filter((id) => id === bridge.id).length;
                 return (
                   <li
                     key={bridge.id}
+                    title={`${bridge.name}: ${count} crossings`}
                     aria-label={`${bridge.name}: ${count} ${count === 1 ? 'crossing' : 'crossings'}`}
                   >
                     <span className="tally-bridge-number">{bridge.id}</span>
@@ -514,8 +465,8 @@ export default function KonigsbergExperience() {
                   </li>
                 );
               })}
-            </ol>
-          </aside>
+          </TallyMarquee>
+      </div>
           <dialog
             ref={learnDialog}
             className="learn-dialog"
