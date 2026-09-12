@@ -432,7 +432,10 @@ export default function KonigsbergExperience() {
               </button>
               <button
                 className="compact-control sound-control"
-                onClick={() => setSoundEnabled(!soundEnabled)}
+                onClick={() => {
+                  if (!soundEnabled) footsteps.unlock();
+                  setSoundEnabled(!soundEnabled);
+                }}
                 aria-label={soundEnabled ? 'Mute walking sounds' : 'Turn on walking sounds'}
                 aria-pressed={soundEnabled}
                 title={soundEnabled ? 'Sound on' : 'Sound off'}

@@ -1,14 +1,16 @@
 import { useCallback, useEffect, useState } from 'react';
 
-const STORAGE_KEY = 'minimundos.sound-enabled';
+const STORAGE_KEY = 'minimundos.sound-enabled-v2';
 const CHANGE_EVENT = 'minimundos:sound-change';
 
 function readPreference() {
   try {
-    return window.localStorage.getItem(STORAGE_KEY) !== 'false';
+    const stored = window.localStorage.getItem(STORAGE_KEY);
+    if (stored !== null) return stored === 'true';
   } catch {
-    return true;
+    // Fall through to the device default when storage is unavailable.
   }
+  return !window.matchMedia('(max-width: 850px)').matches;
 }
 
 export function useSoundPreference() {
