@@ -1,9 +1,10 @@
 import { useEffect, useRef, useState, type MutableRefObject, type PointerEvent } from 'react';
 import { analogInput, keyboardInput, type MovementInput } from '../../game/movement';
 
-export default function MovementJoystick({ input, disabled }: {
+export default function MovementJoystick({ input, disabled, onInteraction }: {
   input: MutableRefObject<MovementInput>;
   disabled: boolean;
+  onInteraction?: () => void;
 }) {
   const surface = useRef<HTMLDivElement>(null);
   const pointer = useRef<number | null>(null);
@@ -29,6 +30,7 @@ export default function MovementJoystick({ input, disabled }: {
       if (event.target instanceof Element && event.target.closest('input, textarea, select, button, [contenteditable="true"], [role="tab"]')) return;
       if (!['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'KeyW', 'KeyA', 'KeyS', 'KeyD', 'ShiftLeft', 'ShiftRight'].includes(event.code)) return;
       event.preventDefault();
+      onInteraction?.();
       keys.current.add(event.code);
       update();
     };
@@ -51,7 +53,7 @@ export default function MovementJoystick({ input, disabled }: {
       document.removeEventListener('visibilitychange', clear);
       document.removeEventListener('focusin', focus);
     };
-  }, [disabled, input]);
+  }, [disabled, input, onInteraction]);
 
   function move(event: PointerEvent<HTMLDivElement>) {
     if (pointer.current !== event.pointerId) return;
@@ -72,6 +74,7 @@ export default function MovementJoystick({ input, disabled }: {
         onPointerDown={(event) => {
           if (disabled || pointer.current !== null || event.button !== 0) return;
           event.preventDefault();
+          onInteraction?.();
           event.currentTarget.focus({ preventScroll: true });
           pointer.current = event.pointerId;
           event.currentTarget.setPointerCapture(event.pointerId);

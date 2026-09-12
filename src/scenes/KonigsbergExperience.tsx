@@ -182,6 +182,9 @@ export default function KonigsbergExperience() {
     };
   }, [footsteps, soundEnabled]);
   useEffect(() => () => footsteps.dispose(), [footsteps]);
+  const unlockSound = useCallback(() => {
+    if (soundEnabled) footsteps.unlock();
+  }, [footsteps, soundEnabled]);
   const [start, setStart] = useState<Region>('south');
   const [draftStart, setDraftStart] = useState<Region>('south');
   const startDialog = useRef<HTMLDialogElement>(null);
@@ -236,6 +239,7 @@ export default function KonigsbergExperience() {
   const onCross = useCallback(
     (id: number) => {
       if (moving) return;
+      unlockSound();
       const result = cross(at, used, id);
       if (!result) {
         setMessage(
@@ -259,7 +263,7 @@ export default function KonigsbergExperience() {
       pendingCrossing.current = result;
       setMessage(`Crossing ${b.name}…`);
     },
-    [at, used, moving],
+    [at, used, moving, unlockSound],
   );
   const onManualCross = useCallback(
     (id: number) => {
@@ -481,7 +485,11 @@ export default function KonigsbergExperience() {
             footsteps={footsteps}
           />
         </SceneBoundary>
-        <MovementJoystick input={input} disabled={moving || choosingStart || (panelOpen && compactView)} />
+        <MovementJoystick
+          input={input}
+          disabled={moving || choosingStart || (panelOpen && compactView)}
+          onInteraction={unlockSound}
+        />
           <TallyMarquee>
               {bridges.map((bridge) => {
                 const count = used.filter((id) => id === bridge.id).length;
