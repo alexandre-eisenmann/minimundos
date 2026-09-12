@@ -16,6 +16,7 @@ import { Townspeople } from './assets/Townspeople';
 import { House, Cathedral } from './assets/Architecture';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { houses, landAt, advanceCrossing, canWalk } from '../game/navigation';
+import { FootstepPlayer } from '../game/sound';
 import * as THREE from 'three';
 import { bridges, regions, type Region, type Point } from '../game/world';
 const mat = (color: string) => ({ color, roughness: 0.85, flatShading: true });
@@ -153,6 +154,7 @@ function Traveller({
   playerPosition,
   input,
   paused,
+  soundEnabled,
 }: {
   journey: Journey;
   onArrive: () => void;
@@ -162,15 +164,28 @@ function Traveller({
   playerPosition: MutableRefObject<Point>;
   input: MutableRefObject<MovementInput>;
   paused: boolean;
+  soundEnabled: boolean;
 }) {
   const ref = useRef<THREE.Group>(null);
   const motion = useRef(0);
+  const footsteps = useMemo(() => new FootstepPlayer(), []);
+  useEffect(() => () => footsteps.dispose(), [footsteps]);
+  useEffect(() => {
+    if (!soundEnabled) return;
+    const unlock = () => footsteps.unlock();
+    window.addEventListener('pointerdown', unlock, { capture: true });
+    window.addEventListener('keydown', unlock, { capture: true });
+    return () => {
+      window.removeEventListener('pointerdown', unlock, { capture: true });
+      window.removeEventListener('keydown', unlock, { capture: true });
+    };
+  }, [footsteps, soundEnabled]);
   const step = useRef(0),
     key = useRef(-1),
     bridge = useRef<number | null>(null),
     bank = useRef(at);
   const { camera, gl } = useThree();
-  useFrame((_, dt) => {
+  useFrame(({ clock }, dt) => {
     if (!ref.current) return;
     const obj = ref.current;
     if (key.current !== journey.key) {
@@ -240,6 +255,11 @@ function Traveller({
       }
     }
     motion.current = walking ? 1 : 0;
+    footsteps.update(
+      clock.elapsedTime,
+      soundEnabled && walking,
+      bridge.current !== null || Boolean(target && step.current === 2),
+    );
     playerPosition.current = [obj.position.x, obj.position.y, obj.position.z];
     gl.domElement.dataset.player = playerPosition.current
       .map((n) => n.toFixed(3))
@@ -429,15 +449,20 @@ function CameraControls({
   }, [camera, gl]);
   useEffect(() => {
     const compactView = window.matchMedia('(max-width: 850px)').matches;
+    const portraitView = compactView && size.height > size.width;
     camera.position.set(20, 24, -27);
     (camera as THREE.OrthographicCamera).zoom = Math.max(
       8,
-      Math.min(36, size.width / (compactView ? 30 : 31), size.height / 21),
+      Math.min(
+        36,
+        size.width / (portraitView ? 22 : compactView ? 30 : 31),
+        size.height / 21,
+      ),
     );
     camera.updateProjectionMatrix();
     controls.current?.target.set(0, 0, 0);
     controls.current?.update();
-    if (compactView && controls.current) {
+    if (compactView && !portraitView && controls.current) {
       // Pan the framing upward so the city sits lower beneath the title.
       const offset = new THREE.Vector3(0, 1, 0)
         .applyQuaternion(camera.quaternion)
@@ -481,6 +506,7 @@ export default function Konigsberg({
   input,
   paused,
   labelsVisible,
+  soundEnabled,
 }: {
   at: Region;
   used: number[];
@@ -494,6 +520,7 @@ export default function Konigsberg({
   input: MutableRefObject<MovementInput>;
   paused: boolean;
   labelsVisible: boolean;
+  soundEnabled: boolean;
 }) {
   return (
     <Canvas
@@ -541,6 +568,7 @@ export default function Konigsberg({
             playerPosition={playerPosition}
             input={input}
             paused={paused}
+            soundEnabled={soundEnabled}
           />
         </group>
       </Suspense>

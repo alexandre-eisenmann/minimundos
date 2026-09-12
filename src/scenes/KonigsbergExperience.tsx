@@ -20,6 +20,8 @@ import {
   X,
   Footprints,
   MapPin,
+  Volume2,
+  VolumeX,
 } from 'lucide-react';
 import {
   Tabs,
@@ -37,6 +39,7 @@ import {
   type Region,
   type Point,
 } from '../game/world';
+import { useSoundPreference } from '../game/sound';
 class SceneBoundary extends Component<
   { children: ReactNode },
   { error: boolean }
@@ -161,6 +164,7 @@ function TallyMarks({ count }: { count: number }) {
 }
 
 export default function KonigsbergExperience() {
+  const [soundEnabled, setSoundEnabled] = useSoundPreference();
   const [start, setStart] = useState<Region>('south');
   const [draftStart, setDraftStart] = useState<Region>('south');
   const startDialog = useRef<HTMLDialogElement>(null);
@@ -405,6 +409,15 @@ export default function KonigsbergExperience() {
                 aria-pressed={!labelsVisible} title={labelsVisible ? 'Hide title and bridge numbers' : 'Show title and bridge numbers'}>
                 {labelsVisible ? <EyeOff size={19} /> : <Eye size={19} />}
               </button>
+              <button
+                className="compact-control sound-control"
+                onClick={() => setSoundEnabled(!soundEnabled)}
+                aria-label={soundEnabled ? 'Mute walking sounds' : 'Turn on walking sounds'}
+                aria-pressed={soundEnabled}
+                title={soundEnabled ? 'Sound on' : 'Sound off'}
+              >
+                {soundEnabled ? <Volume2 size={19} /> : <VolumeX size={19} />}
+              </button>
             <button
               className="learn-button"
               aria-label="Learn about the seven bridges"
@@ -447,6 +460,7 @@ export default function KonigsbergExperience() {
             input={input}
             paused={choosingStart || (panelOpen && compactView)}
             labelsVisible={labelsVisible}
+            soundEnabled={soundEnabled}
           />
         </SceneBoundary>
         <MovementJoystick input={input} disabled={moving || choosingStart || (panelOpen && compactView)} />

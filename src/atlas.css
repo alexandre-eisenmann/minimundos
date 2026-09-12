@@ -5,7 +5,22 @@
   padding: clamp(24px, 6vw, 80px);
   line-height: 1.6;
 }
+.atlas-menu { display: flex; align-items: center; justify-content: space-between; gap: 24px; }
 .atlas-brand { color: #dfbb7d; font-size: 24px; text-decoration: none; }
+.sound-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 42px;
+  padding: 8px 11px;
+  border: 1px solid #8da59a60;
+  border-radius: 12px;
+  background: #203f49;
+  color: #f1eadb;
+}
+.sound-toggle svg { color: #dfbb7d; }
+.sound-toggle small { color: #aebfba; }
+.sound-toggle[aria-pressed='false'] { color: #b9c5c0; background: #193741; }
 .atlas h1 { margin: 40px 0 24px; font:  clamp(28px, 5vw, 44px)/1.2 Georgia, serif; }
 .atlas-worlds { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr)); gap: 24px; }
 .atlas-world { display: block; padding: 28px; border: 1px solid #8da59a60; border-radius: 16px; background: #203f49; text-decoration: none; }
