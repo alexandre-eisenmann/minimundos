@@ -945,10 +945,21 @@ p {
 .game .tally-track ol { flex: 0 0 auto; width: max-content; min-width: 100%; }
 .game .tally-track li:first-child, .game .tally-track li:last-child { padding: 0 12px; }
 .game .tally-pause { display: grid; place-items: center; flex: 0 0 30px; height: 30px; padding: 0; border: 0; border-left: 1px solid #a9b5bc33; border-radius: 0; background: transparent; color: #dce3eb; }
+@media (max-width: 850px) and (max-height: 500px) and (orientation: landscape) {
+  .game .bridge-tallies {
+    left: calc(-1 * max(16px, env(safe-area-inset-left)));
+    right: calc(-1 * max(16px, env(safe-area-inset-right)));
+    width: auto;
+  }
+}
 @media (max-height: 500px) and (orientation: landscape) {
+  .game .bridge-tallies {
+    height: 26px;
+    padding: 0 max(10px, env(safe-area-inset-right)) 0 max(10px, env(safe-area-inset-left));
+  }
   .game .bridge-tallies li,
   .game .tally-pause {
-    min-height: max(16px, calc(30px - env(safe-area-inset-bottom)));
-    height: max(16px, calc(30px - env(safe-area-inset-bottom)));
+    min-height: 26px;
+    height: 26px;
   }
 }
