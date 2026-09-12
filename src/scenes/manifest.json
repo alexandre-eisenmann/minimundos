@@ -10,5 +10,17 @@
       "image": "/minimundos-social-card.png",
       "imageAlt": "MiniMundos miniature map of Königsberg, with seven bridges connecting four areas of land."
     }
+  },
+  {
+    "slug": "brachistochrone",
+    "path": "/scenes/brachistochrone",
+    "title": "The curve of fastest descent",
+    "learningObjective": "Discover why the quickest descent is not the shortest path.",
+    "social": {
+      "title": "MiniMundos · The Brachistochrone",
+      "description": "Shape a wooden track, release three riders together, and discover the curve of fastest descent.",
+      "image": "/minimundos-social-card.png",
+      "imageAlt": "A miniature mathematical world."
+    }
   }
 ]

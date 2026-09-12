@@ -1,12 +1,6 @@
-.atlas {
-  min-height: 100dvh;
-  max-width: 1100px;
-  margin: 0 auto;
-  padding: clamp(24px, 6vw, 80px);
-  line-height: 1.6;
-}
+.atlas { min-height: 100dvh; max-width: 1180px; margin: 0 auto; padding: clamp(24px, 6vw, 80px); line-height: 1.6; }
 .atlas-menu { display: flex; align-items: center; justify-content: space-between; gap: 24px; }
-.atlas-brand { color: #dfbb7d; font-size: 24px; text-decoration: none; }
+.atlas-brand { color: #efddba; font-size: clamp(30px, 4vw, 42px); text-decoration: none; text-shadow: 0 4px 20px #071c25; }
 .sound-toggle {
   display: inline-flex;
   align-items: center;
@@ -21,12 +15,21 @@
 .sound-toggle svg { color: #dfbb7d; }
 .sound-toggle small { color: #aebfba; }
 .sound-toggle[aria-pressed='false'] { color: #b9c5c0; background: #193741; }
-.atlas h1 { margin: 40px 0 24px; font:  clamp(28px, 5vw, 44px)/1.2 Georgia, serif; }
-.atlas-worlds { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr)); gap: 24px; }
-.atlas-world { display: block; padding: 28px; border: 1px solid #8da59a60; border-radius: 16px; background: #203f49; text-decoration: none; }
-.atlas-world:hover { border-color: #dfbb7d; background: #294952; }
-.atlas-world h2 { margin: 0 0 16px; font: 26px/1.3 Georgia, serif; }
-.atlas-world p { color: #c8d5ce; margin: 0 0 24px; }
+.atlas h1 { max-width: 760px; margin: clamp(70px, 12vh, 130px) 0 14px; font: clamp(38px, 7vw, 76px)/1.03 Georgia, serif; letter-spacing: -.035em; color: #f0dfbc; }
+.atlas-introduction { max-width: 660px; margin: 0 0 42px; color: #c8d5ce; font-size: clamp(16px, 2vw, 19px); }
+.atlas-worlds { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; }
+.atlas-world { position: relative; min-height: 250px; display: flex; flex-direction: column; padding: clamp(24px, 4vw, 38px); border: 1px solid #8da59a60; border-radius: 18px; background: linear-gradient(145deg, #203f49, #193740); box-shadow: 0 18px 44px #081e2738; text-decoration: none; overflow: hidden; transition: transform .18s ease, border-color .18s ease; }
+.atlas-world::after { content: ''; position: absolute; right: -55px; bottom: -70px; width: 200px; height: 200px; border: 1px solid #dfbb7d26; border-radius: 50%; box-shadow: 0 0 0 28px #dfbb7d0a, 0 0 0 58px #dfbb7d08; }
+.atlas-world:hover { border-color: #dfbb7d; background: linear-gradient(145deg, #294d55, #1c3c45); transform: translateY(-2px); }
+.atlas-world small { color: #dfbb7d; font-size: 12px; letter-spacing: .08em; text-transform: uppercase; }
+.atlas-world h2 { max-width: 460px; margin: 20px 0 12px; font: clamp(27px, 3.5vw, 38px)/1.15 Georgia, serif; color: #f3e8d1; }
+.atlas-world p { max-width: 440px; color: #c8d5ce; margin: 0 0 30px; }
 .atlas-world span { color: #dfbb7d; }
+.atlas-world > span { position: relative; z-index: 1; margin-top: auto; }
 .atlas a:focus-visible { outline: 2px solid #dfbb7d; outline-offset: 6px; }
 .topbar a.brand { pointer-events: auto; text-decoration: none; }
+@media (max-width: 700px) {
+  .atlas h1 { margin-top: 70px; }
+  .atlas-worlds { grid-template-columns: 1fr; }
+  .atlas-world { min-height: 230px; }
+}

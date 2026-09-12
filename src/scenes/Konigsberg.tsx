@@ -1,7 +1,6 @@
 import type { MovementInput } from '../game/movement';
 import {
   Suspense,
-  useEffect,
   useMemo,
   useRef,
   type MutableRefObject,
@@ -14,11 +13,11 @@ import { HumanCharacter } from './assets/HumanCharacter';
 import { PlayerBeacon } from './assets/PlayerBeacon';
 import { Townspeople } from './assets/Townspeople';
 import { House, Cathedral } from './assets/Architecture';
-import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { SceneCamera } from './assets/SceneCamera';
 import { houses, landAt, advanceCrossing, canWalk } from '../game/navigation';
 import { FootstepPlayer } from '../game/sound';
 import * as THREE from 'three';
-import { bridges, regions, type Region, type Point } from '../game/world';
+import { bridges, type Region, type Point } from '../game/world';
 const mat = (color: string) => ({ color, roughness: 0.85, flatShading: true });
 function Box({
   p,
@@ -217,7 +216,8 @@ function Traveller({
           .normalize()
           .multiplyScalar(
             Math.min(dt, 0.035) *
-              Math.min(1, Math.hypot(dx, dz)) * (input.current.sprint ? 6 : 3.8),
+              Math.min(1, Math.hypot(dx, dz)) *
+              (input.current.sprint ? 6 : 3.8),
           );
         const nx = obj.position.x + move.x,
           nz = obj.position.z + move.z;
@@ -409,80 +409,6 @@ function Landscape() {
     </>
   );
 }
-function CameraControls({
-  resetKey,
-  zoomStep,
-}: {
-  resetKey: number;
-  zoomStep: number;
-}) {
-  const { camera, gl, size } = useThree();
-  const controls = useRef<OrbitControls | null>(null);
-  const lastZoom = useRef(zoomStep);
-  useEffect(() => {
-    const c = new OrbitControls(camera, gl.domElement);
-    c.enableDamping = true;
-    c.dampingFactor = 0.08;
-    c.enablePan = true;
-    c.minPolarAngle = 0.32;
-    c.maxPolarAngle = 1.25;
-    c.minZoom = 8;
-    c.maxZoom = 65;
-    c.zoomSpeed = 1.2;
-    c.rotateSpeed = 0.6;
-    c.target.set(0, 0, 0);
-    controls.current = c;
-    return () => {
-      c.dispose();
-      controls.current = null;
-    };
-  }, [camera, gl]);
-  useEffect(() => {
-    const compactView = window.matchMedia('(max-width: 850px)').matches;
-    const portraitView = compactView && size.height > size.width;
-    camera.position.set(20, 24, -27);
-    (camera as THREE.OrthographicCamera).zoom = Math.max(
-      8,
-      Math.min(
-        36,
-        size.width / (portraitView ? 22 : compactView ? 30 : 31),
-        size.height / 21,
-      ),
-    );
-    camera.updateProjectionMatrix();
-    controls.current?.target.set(0, 0, 0);
-    controls.current?.update();
-    if (compactView && !portraitView && controls.current) {
-      // Pan the framing upward so the city sits lower beneath the title.
-      const offset = new THREE.Vector3(0, 1, 0)
-        .applyQuaternion(camera.quaternion)
-        .multiplyScalar(size.height * 0.075 / (camera as THREE.OrthographicCamera).zoom);
-      camera.position.add(offset);
-      controls.current.target.add(offset);
-      controls.current.update();
-    }
-  }, [camera, resetKey, size.width, size.height]);
-  useEffect(() => {
-    const cam = camera as THREE.OrthographicCamera;
-    cam.zoom = THREE.MathUtils.clamp(
-      cam.zoom * Math.pow(1.35, zoomStep - lastZoom.current),
-      8,
-      65,
-    );
-    lastZoom.current = zoomStep;
-    cam.updateProjectionMatrix();
-  }, [zoomStep, camera]);
-  useFrame(() => {
-    controls.current?.update();
-    gl.domElement.dataset.camera = [
-      ...camera.position.toArray(),
-      (camera as THREE.OrthographicCamera).zoom,
-    ]
-      .map((n) => n.toFixed(2))
-      .join(',');
-  });
-  return null;
-}
 export default function Konigsberg({
   at,
   used,
@@ -565,7 +491,7 @@ export default function Konigsberg({
           />
         </group>
       </Suspense>
-      <CameraControls resetKey={resetKey} zoomStep={zoomStep} />
+      <SceneCamera resetKey={resetKey + zoomStep} />
     </Canvas>
   );
 }

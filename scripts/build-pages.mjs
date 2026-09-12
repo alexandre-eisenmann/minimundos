@@ -8,7 +8,7 @@ const manifest = JSON.parse(
 const shell = await readFile(new URL('index.html', dist), 'utf8');
 const siteBase = new URL(
   process.env.SITE_URL ??
-    'https://alexandre-eisenmann.github.io/minimundos/',
+    'https://mercator-mathematical-worlds.alexandre-eisenmann.chatgpt.site/',
 );
 
 function escapeHtml(value) {

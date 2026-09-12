@@ -43,7 +43,7 @@ export default function App() {
   return (
     <main className="atlas">
       <header className="atlas-menu">
-        <a className="atlas-brand" href={hrefFor('/')}>MiniMundos</a>
+        <a className="atlas-brand brand" href={hrefFor('/')}>MiniMundos</a>
         <button
           className="sound-toggle"
           type="button"
@@ -56,17 +56,23 @@ export default function App() {
           <small>{soundEnabled ? 'On' : 'Off'}</small>
         </button>
       </header>
-      <h1>{isAtlas ? 'Choose a minimundo' : 'World not found'}</h1>
+      <h1>{isAtlas ? 'An atlas of mathematical worlds' : 'World not found'}</h1>
       {isAtlas ? (
-        <nav className="atlas-worlds" aria-label="Minimundos">
-          {sceneRegistry.map((entry) => (
+        <>
+          <p className="atlas-introduction">
+            Step inside a historical puzzle. Walk around, experiment, and discover the mathematical idea for yourself.
+          </p>
+          <nav className="atlas-worlds" aria-label="Minimundos">
+          {sceneRegistry.map((entry, index) => (
             <a className="atlas-world" key={entry.slug} href={hrefFor(entry.path)}>
+              <small>Minimundo {String(index + 1).padStart(2, '0')} · {entry.period}</small>
               <h2>{entry.title}</h2>
               <p>{entry.learningObjective}</p>
-              <span>Explore world →</span>
+              <span>Enter the world →</span>
             </a>
           ))}
-        </nav>
+          </nav>
+        </>
       ) : (
         <><p>This URL does not match a minimundo.</p><a href={hrefFor('/')}>Back to all worlds</a></>
       )}
