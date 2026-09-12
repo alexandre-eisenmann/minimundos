@@ -945,3 +945,10 @@ p {
 .game .tally-track ol { flex: 0 0 auto; width: max-content; min-width: 100%; }
 .game .tally-track li:first-child, .game .tally-track li:last-child { padding: 0 12px; }
 .game .tally-pause { display: grid; place-items: center; flex: 0 0 30px; height: 30px; padding: 0; border: 0; border-left: 1px solid #a9b5bc33; border-radius: 0; background: transparent; color: #dce3eb; }
+@media (max-height: 500px) and (orientation: landscape) {
+  .game .bridge-tallies li,
+  .game .tally-pause {
+    min-height: max(16px, calc(30px - env(safe-area-inset-bottom)));
+    height: max(16px, calc(30px - env(safe-area-inset-bottom)));
+  }
+}

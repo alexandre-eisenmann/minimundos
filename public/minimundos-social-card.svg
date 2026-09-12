@@ -1,0 +1,103 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" role="img" aria-labelledby="title description">
+  <title id="title">MiniMundos &#8212; The Seven Bridges of K&#246;nigsberg</title>
+  <desc id="description">A polished miniature map invites players to cross every bridge exactly once.</desc>
+  <defs>
+    <style>
+      @font-face {
+        font-family: "Mystery Quest";
+        src: url("./fonts/mystery-quest.woff2") format("woff2");
+        font-style: normal;
+        font-weight: 400;
+      }
+      .brand { font-family: "Mystery Quest", Georgia, serif; }
+      .serif { font-family: Georgia, "Times New Roman", serif; }
+      .sans { font-family: Arial, Helvetica, sans-serif; }
+    </style>
+    <linearGradient id="background" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0b2832"/>
+      <stop offset=".55" stop-color="#133843"/>
+      <stop offset="1" stop-color="#1d4850"/>
+    </linearGradient>
+    <linearGradient id="water" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#79b8ba"/>
+      <stop offset="1" stop-color="#3d858e"/>
+    </linearGradient>
+    <linearGradient id="land" x1="0" y1="0" x2=".8" y2="1">
+      <stop offset="0" stop-color="#b9cd8d"/>
+      <stop offset="1" stop-color="#769965"/>
+    </linearGradient>
+    <linearGradient id="paper" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#fff9e9"/>
+      <stop offset="1" stop-color="#efe1c2"/>
+    </linearGradient>
+    <filter id="card-shadow" x="-20%" y="-20%" width="150%" height="160%">
+      <feDropShadow dx="0" dy="24" stdDeviation="28" flood-color="#03151c" flood-opacity=".45"/>
+    </filter>
+    <filter id="soft-shadow" x="-30%" y="-30%" width="170%" height="180%">
+      <feDropShadow dx="0" dy="8" stdDeviation="7" flood-color="#17333d" flood-opacity=".32"/>
+    </filter>
+    <filter id="glow" x="-100%" y="-100%" width="300%" height="300%">
+      <feGaussianBlur stdDeviation="12"/>
+    </filter>
+    <pattern id="waves" width="46" height="28" patternUnits="userSpaceOnUse">
+      <path d="M0 15c8-7 15-7 23 0s15 7 23 0" fill="none" stroke="#d7f0e8" stroke-width="2" opacity=".22"/>
+    </pattern>
+    <clipPath id="map-clip">
+      <rect x="654" y="76" width="454" height="478" rx="28"/>
+    </clipPath>
+  </defs>
+
+  <rect width="1200" height="630" fill="url(#background)"/>
+  <circle cx="1120" cy="-20" r="250" fill="#e8c57d" opacity=".06"/>
+  <circle cx="66" cy="616" r="210" fill="#67a7a4" opacity=".08"/>
+  <path d="M0 90C180 8 335 18 490 80S860 166 1200 40" fill="none" stroke="#b6d5c4" stroke-width="1.5" opacity=".07"/>
+  <path d="M0 551c239-90 399-60 584 10s374 82 616-5" fill="none" stroke="#b6d5c4" stroke-width="1.5" opacity=".06"/>
+
+  <g transform="translate(76 61)">
+    <text y="30" class="brand" fill="#f3dfb7" font-size="40">MiniMundos</text>
+  </g>
+
+  <g transform="translate(76 165)">
+    <text class="sans" fill="#9fc3b6" font-size="14" font-weight="700" letter-spacing="3.2">A PLAYABLE MATHEMATICAL WORLD</text>
+    <text y="67" class="serif" fill="#fff8e8" font-size="53" font-weight="700">
+      <tspan x="0">Can you cross</tspan>
+      <tspan x="0" dy="60">every bridge</tspan>
+      <tspan x="0" dy="60">exactly once?</tspan>
+    </text>
+    <text y="273" class="sans" fill="#c2d4cd" font-size="20">
+      Walk through 18th-century K&#246;nigsberg
+    </text>
+    <text y="303" class="sans" fill="#c2d4cd" font-size="20">
+      and discover the idea that began graph theory.
+    </text>
+  </g>
+
+  <g transform="translate(76 524)">
+    <rect width="218" height="46" rx="23" fill="#e4bf78"/>
+    <text x="109" y="29" text-anchor="middle" class="sans" fill="#17333d" font-size="14" font-weight="700" letter-spacing=".6">ENTER THE MINIMUNDO</text>
+    <text x="240" y="29" class="sans" fill="#8fb5aa" font-size="14">A 5-minute exploration</text>
+  </g>
+
+  <g filter="url(#card-shadow)">
+    <rect x="630" y="52" width="502" height="526" rx="38" fill="#102c35" stroke="#efcf95" stroke-opacity=".34"/>
+    <rect x="654" y="76" width="454" height="478" rx="28" fill="url(#water)"/>
+  </g>
+
+  <g clip-path="url(#map-clip)">
+    <image
+      href="./konigsberg-world.png"
+      x="654"
+      y="76"
+      width="454"
+      height="478"
+      preserveAspectRatio="xMidYMid slice"
+    />
+  </g>
+
+  <rect x="670" y="92" width="156" height="30" rx="15" fill="#0c2b35" fill-opacity=".78" stroke="#e6cc91" stroke-opacity=".45"/>
+  <text x="748" y="112" text-anchor="middle" class="sans" fill="#f4e7c9" font-size="11" font-weight="700" letter-spacing="1.4">K&#214;NIGSBERG &#183; 1736</text>
+  <g transform="translate(1059 527)">
+    <circle r="22" fill="#0c2b35" fill-opacity=".8" stroke="#efcf95" stroke-opacity=".55"/>
+    <path d="M-7 5 8-6M2-7h7v7" fill="none" stroke="#efcf95" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+</svg>
