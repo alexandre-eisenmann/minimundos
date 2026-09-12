@@ -17,7 +17,7 @@ React 19, TypeScript, Vite, Tailwind CSS, Three.js, React Three Fiber and Drei. 
 
 The scene preserves the historical multigraph: north–island twice, south–island twice, north–east, south–east, island–east. The geography is schematic; architecture, costumes and scenery are illustrative, not an archaeological reconstruction. The two eastern river outlets each have a full-channel cascade, with the visible current flowing east. These are diorama effects, not historical waterfalls.
 
-WASD and arrow keys move the traveller relative to the camera; Shift runs. On-screen directional buttons support touch. Land, water, bridges and building footprints constrain movement. Clicking a bridge also offers a guided crossing. Progress is session-local. Future scenes can replace geometry with authored GLTF characters and costumes without changing the challenge rules. Generative terrain streaming, authored historical dialogue and time navigation are future work.
+WASD and arrow keys move the traveller relative to the camera; Shift runs. An on-screen analog joystick supports touch and mouse dragging across phone, tablet, and desktop viewports. Drag distance controls walking speed; the joystick also reflects keyboard movement. Land, water, bridges and building footprints constrain movement. Clicking a bridge also offers a guided crossing. Progress is session-local. Future scenes can replace geometry with authored GLTF characters and costumes without changing the challenge rules. Generative terrain streaming, authored historical dialogue and time navigation are future work.
 
 The public site is deployed to GitHub Pages at `https://alexandre-eisenmann.github.io/minimundos/`.
 

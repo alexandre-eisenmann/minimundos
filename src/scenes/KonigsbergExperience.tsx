@@ -1,3 +1,5 @@
+import MovementJoystick from './assets/MovementJoystick';
+import type { MovementInput } from '../game/movement';
 import {
   useState,
   useCallback,
@@ -17,10 +19,6 @@ import {
   X,
   Plus,
   Minus,
-  ArrowUp,
-  ArrowDown,
-  ArrowLeft,
-  ArrowRight,
   Footprints,
   MapPin,
 } from 'lucide-react';
@@ -211,7 +209,8 @@ export default function KonigsbergExperience() {
   });
   const [history, setHistory] = useState<{ at: Region; used: number[] }[]>([]);
   const playerPosition = useRef<Point>(regions.south.position);
-  const input = useRef({ x: 0, z: 0 });
+  const input = useRef<MovementInput>({ x: 0, z: 0 });
+  const [choosingStart, setChoosingStart] = useState(false);
   const available = availableBridges(at, used);
   const explored = new Set(used).size === 7;
   const pendingCrossing = useRef<ReturnType<typeof cross>>(null);
@@ -269,6 +268,7 @@ export default function KonigsbergExperience() {
     }
   }, []);
   function chooseStart() {
+    setChoosingStart(true);
     setDraftStart(start);
     input.current = { x: 0, z: 0 };
     startDialog.current?.showModal();
@@ -369,7 +369,7 @@ export default function KonigsbergExperience() {
   }, []);
   return (
     <main className="game">
-      <dialog ref={startDialog} className="start-dialog" aria-labelledby="start-title">
+      <dialog ref={startDialog} className="start-dialog" aria-labelledby="start-title" onClose={() => setChoosingStart(false)}>
         <form onSubmit={(event) => {
           event.preventDefault();
           restart(draftStart);
@@ -436,10 +436,11 @@ export default function KonigsbergExperience() {
             onManualCross={onManualCross}
             playerPosition={playerPosition}
             input={input}
-            paused={panelOpen && compactView}
+            paused={choosingStart || (panelOpen && compactView)}
             labelsVisible={labelsVisible}
           />
         </SceneBoundary>
+        <MovementJoystick input={input} disabled={moving || choosingStart || (panelOpen && compactView)} />
       </div>
           <div className="control-dock">
             <div className="control-row">
@@ -458,30 +459,6 @@ export default function KonigsbergExperience() {
                 role="toolbar"
                 aria-label="Scene controls"
               >
-                <div className="dock-movement-controls" role="group" aria-label="Walking controls">
-                  {[
-                    { label: 'Walk left', x: -1, z: 0, icon: ArrowLeft },
-                    { label: 'Walk forward', x: 0, z: -1, icon: ArrowUp },
-                    { label: 'Walk backward', x: 0, z: 1, icon: ArrowDown },
-                    { label: 'Walk right', x: 1, z: 0, icon: ArrowRight },
-                  ].map((direction) => (
-                    <button
-                      key={direction.label}
-                      aria-label={direction.label}
-                      title={direction.label}
-                      onPointerDown={(event) => {
-                        event.currentTarget.setPointerCapture(event.pointerId);
-                        input.current = { x: direction.x, z: direction.z };
-                      }}
-                      onPointerUp={() => (input.current = { x: 0, z: 0 })}
-                      onPointerCancel={() => (input.current = { x: 0, z: 0 })}
-                      onLostPointerCapture={() => (input.current = { x: 0, z: 0 })}
-                    >
-                      <direction.icon size={17} />
-                    </button>
-                  ))}
-                </div>
-                <span className="control-divider" />
                 <button
                   onClick={() => setLabelsVisible((visible) => !visible)}
                   aria-label={labelsVisible ? 'Hide bridge labels' : 'Show bridge labels'}

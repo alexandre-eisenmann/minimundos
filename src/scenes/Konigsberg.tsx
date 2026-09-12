@@ -1,3 +1,4 @@
+import type { MovementInput } from '../game/movement';
 import {
   Suspense,
   useEffect,
@@ -159,7 +160,7 @@ function Traveller({
   used: number[];
   onManualCross: (id: number) => void;
   playerPosition: MutableRefObject<Point>;
-  input: MutableRefObject<{ x: number; z: number }>;
+  input: MutableRefObject<MovementInput>;
   paused: boolean;
 }) {
   const ref = useRef<THREE.Group>(null);
@@ -168,41 +169,7 @@ function Traveller({
     key = useRef(-1),
     bridge = useRef<number | null>(null),
     bank = useRef(at);
-  const keys = useRef(new Set<string>());
   const { camera, gl } = useThree();
-  useEffect(() => {
-    const down = (e: KeyboardEvent) => {
-      if ((e.target as HTMLElement).closest('input,textarea,select,button'))
-        return;
-      if (
-        [
-          'KeyW',
-          'KeyA',
-          'KeyS',
-          'KeyD',
-          'ArrowUp',
-          'ArrowDown',
-          'ArrowLeft',
-          'ArrowRight',
-          'ShiftLeft',
-          'ShiftRight',
-        ].includes(e.code)
-      ) {
-        e.preventDefault();
-        keys.current.add(e.code);
-      }
-    };
-    const up = (e: KeyboardEvent) => keys.current.delete(e.code);
-    const clear = () => keys.current.clear();
-    window.addEventListener('keydown', down);
-    window.addEventListener('keyup', up);
-    window.addEventListener('blur', clear);
-    return () => {
-      window.removeEventListener('keydown', down);
-      window.removeEventListener('keyup', up);
-      window.removeEventListener('blur', clear);
-    };
-  }, []);
   useFrame((_, dt) => {
     if (!ref.current) return;
     const obj = ref.current;
@@ -232,14 +199,7 @@ function Traveller({
       }
       walking = true;
     } else if (!paused) {
-      let dx =
-        input.current.x +
-        Number(keys.current.has('KeyD') || keys.current.has('ArrowRight')) -
-        Number(keys.current.has('KeyA') || keys.current.has('ArrowLeft'));
-      let dz =
-        input.current.z +
-        Number(keys.current.has('KeyS') || keys.current.has('ArrowDown')) -
-        Number(keys.current.has('KeyW') || keys.current.has('ArrowUp'));
+      const { x: dx, z: dz } = input.current;
       if (dx || dz) {
         const forward = new THREE.Vector3();
         camera.getWorldDirection(forward);
@@ -252,9 +212,7 @@ function Traveller({
           .normalize()
           .multiplyScalar(
             Math.min(dt, 0.035) *
-              (keys.current.has('ShiftLeft') || keys.current.has('ShiftRight')
-                ? 6
-                : 3.8),
+              Math.min(1, Math.hypot(dx, dz)) * (input.current.sprint ? 6 : 3.8),
           );
         const nx = obj.position.x + move.x,
           nz = obj.position.z + move.z;
@@ -533,7 +491,7 @@ export default function Konigsberg({
   zoomStep: number;
   onManualCross: (id: number) => void;
   playerPosition: MutableRefObject<Point>;
-  input: MutableRefObject<{ x: number; z: number }>;
+  input: MutableRefObject<MovementInput>;
   paused: boolean;
   labelsVisible: boolean;
 }) {
