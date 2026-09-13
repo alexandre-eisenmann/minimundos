@@ -7,7 +7,8 @@ import {
 } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { Html } from '@react-three/drei';
-import { Tree, Waterfalls, Clouds } from './assets/Nature';
+import { Tree, Waterfalls, Clouds, Birds, Boulder } from './assets/Nature';
+import { WaterSurface, Ripples } from './assets/Water';
 import { RiverBoat } from './assets/RiverBoat';
 import { HumanCharacter } from './assets/HumanCharacter';
 import { PlayerBeacon } from './assets/PlayerBeacon';
@@ -35,112 +36,6 @@ function Box({
       <boxGeometry args={s} />
       <meshStandardMaterial {...mat(c)} />
     </mesh>
-  );
-}
-function Bird({ i }: { i: number }) {
-  const ref = useRef<THREE.Group>(null),
-    l = useRef<THREE.Group>(null),
-    r = useRef<THREE.Group>(null);
-  const wing = useMemo(() => {
-    const g = new THREE.BufferGeometry();
-    g.setAttribute(
-      'position',
-      new THREE.Float32BufferAttribute(
-        [0, 0, 0.06, 0.21, 0.025, 0.11, 0.46, -0.01, -0.045, 0, 0, -0.06],
-        3,
-      ),
-    );
-    g.setIndex([0, 1, 2, 0, 2, 3]);
-    g.computeVertexNormals();
-    return g;
-  }, []);
-  useFrame(({ clock }) => {
-    const t = clock.elapsedTime * 0.25 + i * 1.7;
-    if (ref.current) {
-      ref.current.position.set(
-        Math.sin(t) * (6 + i * 0.3),
-        4 + Math.sin(t * 1.6) * 0.6,
-        Math.cos(t) * (4 + i * 0.3),
-      );
-      ref.current.rotation.y = -t;
-      ref.current.rotation.z = Math.sin(t) * 0.12;
-    }
-    if (l.current && r.current) {
-      const flap = Math.sin(t * 19) * 0.38;
-      l.current.rotation.z = flap;
-      r.current.rotation.z = -flap;
-    }
-  });
-  return (
-    <group ref={ref}>
-      <mesh scale={[0.065, 0.055, 0.19]}>
-        <sphereGeometry args={[1, 8, 6]} />
-        <meshStandardMaterial color="#deded0" />
-      </mesh>
-      <group ref={l}>
-        <mesh geometry={wing}>
-          <meshStandardMaterial color="#e5e6da" side={THREE.DoubleSide} />
-        </mesh>
-      </group>
-      <group ref={r} scale={[-1, 1, 1]}>
-        <mesh geometry={wing}>
-          <meshStandardMaterial color="#e5e6da" side={THREE.DoubleSide} />
-        </mesh>
-      </group>
-      <mesh position={[0, 0, 0.2]} rotation={[Math.PI / 2, 0, 0]}>
-        <coneGeometry args={[0.025, 0.09, 5]} />
-        <meshStandardMaterial color="#bc9b53" />
-      </mesh>
-    </group>
-  );
-}
-function Water() {
-  const ref = useRef<THREE.Mesh>(null);
-  const geo = useMemo(() => {
-    const g = new THREE.PlaneGeometry(23, 17, 45, 30);
-    g.rotateX(-Math.PI / 2);
-    return g;
-  }, []);
-  useFrame(({ clock }) => {
-    const a = geo.attributes.position;
-    for (let i = 0; i < a.count; i++)
-      a.setY(
-        i,
-        Math.sin(a.getX(i) * 1.8 - clock.elapsedTime * 1.4) * 0.025 +
-          Math.cos(a.getZ(i) * 2.2 + clock.elapsedTime) * 0.02,
-      );
-    a.needsUpdate = true;
-    geo.computeVertexNormals();
-  });
-  return (
-    <mesh ref={ref} geometry={geo} position={[0, 0.14, 0]} receiveShadow>
-      <meshStandardMaterial color="#328d96" roughness={0.3} metalness={0.15} />
-    </mesh>
-  );
-}
-function Ripples() {
-  const ref = useRef<THREE.Group>(null);
-  useFrame(({ clock }) => {
-    ref.current?.children.forEach((ripple, i) => {
-      ripple.position.x =
-        -11.2 + ((i * 3.17 + clock.elapsedTime * 0.48) % 22.4);
-    });
-  });
-  return (
-    <group ref={ref}>
-      {Array.from({ length: 45 }, (_, i) => (
-        <Box
-          key={i}
-          p={[
-            -10 + ((i * 3.17) % 20),
-            0.2,
-            i % 2 ? 2.7 + (i % 3) * 0.25 : -3.2 + (i % 3) * 0.25,
-          ]}
-          s={[0.25 + (i % 4) * 0.15, 0.008, 0.025]}
-          c="#92c8bd"
-        />
-      ))}
-    </group>
   );
 }
 export type Journey = { points: Point[]; key: number };
@@ -349,7 +244,7 @@ function Landscape() {
     <>
       <Box p={[0, -0.7, 0]} s={[23, 1.4, 17]} c="#416366" />
       <Box p={[0, -1.43, 0]} s={[22.9, 0.1, 16.9]} c="#26454c" />
-      <Water />
+      <WaterSurface width={23} depth={17} position={[0, 0.14, 0]} />
       <Ripples />
       <Waterfalls />
       <Clouds />
@@ -393,16 +288,11 @@ function Landscape() {
       <Cathedral />
       <RiverBoat channel={-3} phase={2.4} />
       <RiverBoat channel={3} phase={0.8} />
-      {Array.from({ length: 7 }, (_, i) => (
-        <Bird key={i} i={i} />
-      ))}
+      <Birds />
       <Townspeople />
       {[-10.3, 10.4].map((x) => (
         <group key={x}>
-          <mesh position={[x, 1, -7]} castShadow>
-            <dodecahedronGeometry args={[1.2, 0]} />
-            <meshStandardMaterial {...mat('#87908b')} />
-          </mesh>
+          <Boulder p={[x, 1, -7]} scale={1.2} />
           <Tree p={[x, 0.62, 6]} scale={1.25} pine />
         </group>
       ))}

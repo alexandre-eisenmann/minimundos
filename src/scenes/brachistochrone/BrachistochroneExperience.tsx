@@ -1,11 +1,12 @@
 import {
   Component,
   useCallback,
+  useEffect,
   useRef,
   useState,
   type ReactNode,
 } from 'react';
-import { BookOpen, DoorOpen, RotateCcw, X } from 'lucide-react';
+import { BookOpen, Play, RotateCcw, X } from 'lucide-react';
 import type { MovementInput } from '../../game/movement';
 import MovementJoystick from '../assets/MovementJoystick';
 import BezierEditor from './BezierEditor';
@@ -32,62 +33,42 @@ class SceneBoundary extends Component<
   }
 }
 
-const laneNames = ['Straight', 'Parabola', 'Your curve'];
-
 export default function BrachistochroneExperience() {
   const [anchors, setAnchors] = useState<CurvePoint[]>(() => defaultAnchors(4));
   const [gateOpen, setGateOpen] = useState(false);
-  const [raceKey, setRaceKey] = useState(0);
-  const [phase, setPhase] = useState<'ready' | 'racing' | 'finished'>('ready');
-  const [times, setTimes] = useState([0, 0, 0]);
-  const [finished, setFinished] = useState([false, false, false]);
+
+  const [running, setRunning] = useState([true, true, true, true]);
   const [learnOpen, setLearnOpen] = useState(false);
+  const [editorOpen, setEditorOpen] = useState(
+    () => !window.matchMedia('(max-width: 700px)').matches,
+  );
   const input = useRef<MovementInput>({ x: 0, z: 0 });
-  const lastPaint = useRef([0, 0, 0]);
+  const gateTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const busy = useRef(true);
+  useEffect(() => () => { if (gateTimer.current) clearTimeout(gateTimer.current); }, []);
 
-  const updateTime = useCallback((lane: number, time: number) => {
-    if (time - lastPaint.current[lane] < 0.04) return;
-    lastPaint.current[lane] = time;
-    setTimes((current) =>
-      current.map((value, index) => (index === lane ? time : value)),
-    );
+  const setLane = <T,>(lane: number, value: T) => (current: T[]) =>
+    current.map((held, index) => (index === lane ? value : held));
+
+  const departLane = useCallback((lane: number) => {
+    setRunning(setLane(lane, true));
   }, []);
-
-  const finishLane = useCallback((lane: number, time: number) => {
-    setTimes((current) =>
-      current.map((value, index) => (index === lane ? time : value)),
-    );
-    setFinished((current) => {
-      const next = current.map((value, index) =>
-        index === lane ? true : value,
-      );
-      if (next.every(Boolean)) setPhase('finished');
+  const readyLane = useCallback((lane: number) => {
+    setRunning(current => {
+      const next = current.map((value, index) => index === lane ? false : value);
+      busy.current = next.some(Boolean);
       return next;
     });
   }, []);
-
-  function toggleGate() {
-    setGateOpen((open) => {
-      const next = !open;
-      if (next && phase === 'ready') {
-        setTimes([0, 0, 0]);
-        setFinished([false, false, false]);
-        lastPaint.current = [0, 0, 0];
-        setRaceKey((key) => key + 1);
-        setPhase('racing');
-      }
-      return next;
-    });
-  }
-
-  function resetRace() {
-    setRaceKey(0);
-    setGateOpen(false);
-    setPhase('ready');
-    setTimes([0, 0, 0]);
-    setFinished([false, false, false]);
-    input.current = { x: 0, z: 0 };
-  }
+  const launch = useCallback(() => {
+    if (busy.current) return;
+    busy.current = true;
+    setGateOpen(true);
+    if (window.matchMedia('(max-width: 700px)').matches) setEditorOpen(false);
+    gateTimer.current = setTimeout(() => setGateOpen(false), 1100);
+  }, []);
+  const ignoreTime = useCallback(() => {}, []);
+  const returning = running.some(Boolean);
 
   return (
     <main className="game brachistochrone-game">
@@ -103,11 +84,11 @@ export default function BrachistochroneExperience() {
           <button
             className="compact-control"
             type="button"
-            onClick={resetRace}
-            title="Reset race"
+            onClick={() => setAnchors(defaultAnchors(4))}
+            title="Reset the drawn curve"
           >
             <RotateCcw size={18} />
-            <span>Reset</span>
+            <span>Reset curve</span>
           </button>
           <button
             className="learn-button"
@@ -132,7 +113,7 @@ export default function BrachistochroneExperience() {
         </h1>
         <p className="scene-instruction">
           <span>Shape a track.</span>
-          <span>Release the riders.</span>
+          <span>Release the carts.</span>
         </p>
       </section>
 
@@ -141,54 +122,33 @@ export default function BrachistochroneExperience() {
           <BrachistochroneWorld
             anchors={anchors}
             gateOpen={gateOpen}
-            raceKey={raceKey}
             input={input}
             paused={learnOpen}
-            onTick={updateTime}
-            onFinish={finishLane}
+            onToggleGate={launch}
+            onTick={ignoreTime}
+            onFinish={ignoreTime}
+            onDepart={departLane}
+            onReady={readyLane}
           />
         </SceneBoundary>
         <MovementJoystick input={input} disabled={learnOpen} />
 
-        <section className="race-console" aria-label="Race controls">
-          <div className="race-times">
-            {laneNames.map((name, lane) => (
-              <div key={name} className={finished[lane] ? 'finished' : ''}>
-                <span>{name}</span>
-                <strong>
-                  {times[lane].toFixed(2)}
-                  <small>s</small>
-                </strong>
-              </div>
-            ))}
-          </div>
-          <div className="gate-actions">
-            <button
-              className="release-button"
-              type="button"
-              onClick={toggleGate}
-            >
-              <DoorOpen size={19} />{' '}
-              {gateOpen
-                ? 'Close gates'
-                : phase === 'ready'
-                  ? 'Release riders'
-                  : 'Open gates'}
-            </button>
-            <span aria-live="polite">
-              {phase === 'ready'
-                ? 'Three riders are waiting.'
-                : phase === 'racing'
-                  ? 'The race is running.'
-                  : 'All riders have arrived.'}
-            </span>
-          </div>
-        </section>
+        <button
+          className="launch-action"
+          type="button"
+          onClick={launch}
+          disabled={returning || learnOpen}
+          aria-label={returning ? 'Carts in motion' : 'Release carts'}
+        >
+          <span className="launch-action-icon"><Play size={30} fill="currentColor" strokeWidth={1.3} /></span>
+          <span>{returning ? 'In motion' : 'Release'}</span>
+        </button>
 
         <BezierEditor
           anchors={anchors}
           onChange={setAnchors}
-          disabled={phase === 'racing'}
+          open={editorOpen}
+          onToggle={() => setEditorOpen((open) => !open)}
         />
       </div>
 

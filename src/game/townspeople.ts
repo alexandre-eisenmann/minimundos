@@ -66,7 +66,7 @@ export function pedestrianPose(
       return {
         position: [
           s.a[0] + (s.b[0] - s.a[0]) * f,
-          0.7,
+          s.a[1] + (s.b[1] - s.a[1]) * f,
           s.a[2] + (s.b[2] - s.a[2]) * f,
         ] as Point,
         yaw,

@@ -1,20 +1,24 @@
 import { useRef, type PointerEvent } from 'react';
-import { Minus, Plus } from 'lucide-react';
+import { Minus, Plus, SlidersHorizontal } from 'lucide-react';
 import type { CurvePoint } from './curveMath';
-import { resizeAnchors, sampleBezierSpline } from './curveMath';
+import { resizeAnchors, sampleBezierSpline, sampleCurve } from './curveMath';
 
 const WIDTH = 320;
 const HEIGHT = 190;
 const PAD = 16;
+/** The rig's run over its drop, so the reference curve matches the lane. */
+const ASPECT = 2;
 
 export default function BezierEditor({
   anchors,
   onChange,
-  disabled,
+  open,
+  onToggle,
 }: {
   anchors: CurvePoint[];
   onChange: (anchors: CurvePoint[]) => void;
-  disabled: boolean;
+  open: boolean;
+  onToggle: () => void;
 }) {
   const dragging = useRef<number | null>(null);
   const points = sampleBezierSpline(anchors, 90);
@@ -22,12 +26,15 @@ export default function BezierEditor({
     x: PAD + point.x * (WIDTH - PAD * 2),
     y: PAD + point.y * (HEIGHT - PAD * 2),
   });
-  const path = points
-    .map((point, index) => {
-      const screen = toScreen(point);
-      return `${index ? 'L' : 'M'}${screen.x.toFixed(1)},${screen.y.toFixed(1)}`;
-    })
-    .join(' ');
+  const trace = (line: CurvePoint[]) =>
+    line
+      .map((point, index) => {
+        const screen = toScreen(point);
+        return `${index ? 'L' : 'M'}${screen.x.toFixed(1)} ${screen.y.toFixed(1)}`;
+      })
+      .join(' ');
+  const reference = trace(sampleCurve('cycloid', anchors, 90, ASPECT));
+  const path = trace(points);
 
   function move(event: PointerEvent<SVGSVGElement>) {
     const index = dragging.current;
@@ -47,7 +54,20 @@ export default function BezierEditor({
   }
 
   return (
-    <section className="curve-editor" aria-labelledby="curve-editor-title">
+    <section
+      className={`curve-editor ${open ? 'open' : 'collapsed'}`}
+      aria-labelledby="curve-editor-title"
+    >
+      <button
+        className="curve-editor-toggle"
+        type="button"
+        onClick={onToggle}
+        aria-label={open ? 'Collapse curve editor' : 'Open curve editor'}
+        aria-expanded={open}
+      >
+        <SlidersHorizontal size={18} />
+        <span>{open ? 'Close' : 'Tune'}</span>
+      </button>
       <div className="curve-editor-heading">
         <div>
           <small>Experimental track</small>
@@ -60,7 +80,7 @@ export default function BezierEditor({
           <button
             type="button"
             aria-label="Remove a control point"
-            disabled={disabled || anchors.length <= 3}
+            disabled={anchors.length <= 3}
             onClick={() => onChange(resizeAnchors(anchors, anchors.length - 1))}
           >
             <Minus size={15} />
@@ -69,7 +89,7 @@ export default function BezierEditor({
           <button
             type="button"
             aria-label="Add a control point"
-            disabled={disabled || anchors.length >= 7}
+            disabled={anchors.length >= 7}
             onClick={() => onChange(resizeAnchors(anchors, anchors.length + 1))}
           >
             <Plus size={15} />
@@ -109,6 +129,8 @@ export default function BezierEditor({
           rx="12"
           fill="url(#workbench-grid)"
         />
+        {/* The true brachistochrone, to draw against. */}
+        <path d={reference} className="editor-reference" />
         <path d={path} className="editor-curve-shadow" />
         <path d={path} className="editor-curve" />
         {anchors.map((point, index) => {
@@ -119,7 +141,7 @@ export default function BezierEditor({
               <circle
                 r="11"
                 className={fixed ? 'editor-point fixed' : 'editor-point'}
-                tabIndex={fixed || disabled ? -1 : 0}
+                tabIndex={fixed ? -1 : 0}
                 role="slider"
                 aria-label={
                   fixed
@@ -130,7 +152,7 @@ export default function BezierEditor({
                 aria-valuemax={100}
                 aria-valuenow={Math.round(point.y * 100)}
                 onPointerDown={(event) => {
-                  if (fixed || disabled) return;
+                  if (fixed) return;
                   dragging.current = index;
                   event.currentTarget.ownerSVGElement?.setPointerCapture(
                     event.pointerId,
@@ -142,9 +164,8 @@ export default function BezierEditor({
         })}
       </svg>
       <p>
-        {disabled
-          ? 'Reset the race to edit the track.'
-          : 'Drag the brass points. The wooden track changes with your drawing.'}
+        Drag the brass points. The wooden track changes as you draw. The dashed
+        line is the true brachistochrone — try to beat it.
       </p>
     </section>
   );

@@ -1,5 +1,5 @@
 export type CurvePoint = { x: number; y: number };
-export type CurveKind = 'line' | 'parabola' | 'custom';
+export type CurveKind = 'line' | 'parabola' | 'cycloid' | 'custom';
 
 const clamp01 = (value: number) => Math.max(0, Math.min(1, value));
 
@@ -45,12 +45,51 @@ export function sampleBezierSpline(
   });
 }
 
+/**
+ * Sweep angle at which the cycloid from the cusp reaches the far corner.
+ * (θ − sin θ) / (1 − cos θ) rises monotonically from 0 to infinity across
+ * (0, 2π), so the run-to-drop ratio pins θ down by bisection.
+ */
+function cycloidSweep(aspect: number) {
+  let low = 1e-4;
+  let high = 2 * Math.PI - 1e-4;
+  for (let step = 0; step < 60; step++) {
+    const mid = (low + high) / 2;
+    if (mid - Math.sin(mid) < aspect * (1 - Math.cos(mid))) low = mid;
+    else high = mid;
+  }
+  return (low + high) / 2;
+}
+
+/**
+ * The brachistochrone itself: an inverted cycloid, sampled evenly in sweep
+ * angle so the near-vertical plunge at the cusp stays well resolved.
+ *
+ * Whenever the run is more than about 1.86 times the drop the sweep passes π,
+ * which means the quickest path dips below the finish and climbs back to it.
+ * That overshoot is real, so y is deliberately allowed past 1 here.
+ */
+function sampleCycloid(aspect: number, count: number): CurvePoint[] {
+  const sweep = cycloidSweep(aspect);
+  const run = sweep - Math.sin(sweep);
+  const fall = 1 - Math.cos(sweep);
+  return Array.from({ length: count + 1 }, (_, index) => {
+    const theta = (index / count) * sweep;
+    return {
+      x: (theta - Math.sin(theta)) / run,
+      y: (1 - Math.cos(theta)) / fall,
+    };
+  });
+}
+
 export function sampleCurve(
   kind: CurveKind,
   anchors: CurvePoint[],
   count = 240,
+  aspect = 2,
 ): CurvePoint[] {
   if (kind === 'custom') return sampleBezierSpline(anchors, count);
+  if (kind === 'cycloid') return sampleCycloid(aspect, count);
   return Array.from({ length: count + 1 }, (_, index) => {
     const x = index / count;
     return { x, y: kind === 'line' ? x : 2 * x - x * x };
