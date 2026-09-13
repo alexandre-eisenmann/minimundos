@@ -6,7 +6,7 @@ import {
   useState,
   type ReactNode,
 } from 'react';
-import { BookOpen, Play, RotateCcw, X } from 'lucide-react';
+import { BookOpen, Hammer, Play, X } from 'lucide-react';
 import type { MovementInput } from '../../game/movement';
 import MovementJoystick from '../assets/MovementJoystick';
 import BezierEditor from './BezierEditor';
@@ -37,11 +37,9 @@ export default function BrachistochroneExperience() {
   const [anchors, setAnchors] = useState<CurvePoint[]>(() => defaultAnchors(4));
   const [gateOpen, setGateOpen] = useState(false);
 
-  const [running, setRunning] = useState([true, true, true, true]);
+  const [running, setRunning] = useState([true, true, true]);
   const [learnOpen, setLearnOpen] = useState(false);
-  const [editorOpen, setEditorOpen] = useState(
-    () => !window.matchMedia('(max-width: 700px)').matches,
-  );
+  const [editorOpen, setEditorOpen] = useState(false);
   const input = useRef<MovementInput>({ x: 0, z: 0 });
   const gateTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const busy = useRef(true);
@@ -81,15 +79,6 @@ export default function BrachistochroneExperience() {
           MiniMundos
         </a>
         <div className="topbar-actions">
-          <button
-            className="compact-control"
-            type="button"
-            onClick={() => setAnchors(defaultAnchors(4))}
-            title="Reset the drawn curve"
-          >
-            <RotateCcw size={18} />
-            <span>Reset curve</span>
-          </button>
           <button
             className="learn-button"
             type="button"
@@ -144,13 +133,25 @@ export default function BrachistochroneExperience() {
           <span>{returning ? 'In motion' : 'Release'}</span>
         </button>
 
-        <BezierEditor
-          anchors={anchors}
-          onChange={setAnchors}
-          open={editorOpen}
-          onToggle={() => setEditorOpen((open) => !open)}
-        />
+        <button
+          className="launch-action construction-action"
+          type="button"
+          onClick={() => setEditorOpen(open => !open)}
+          disabled={learnOpen}
+          aria-label="Edit your ramp"
+          aria-expanded={editorOpen}
+          aria-controls="curve-editor"
+        >
+          <span className="launch-action-icon"><Hammer size={30} strokeWidth={1.6} /></span>
+          <span>Build</span>
+        </button>
       </div>
+      <BezierEditor
+        anchors={anchors}
+        onChange={setAnchors}
+        open={editorOpen}
+        onToggle={() => setEditorOpen(false)}
+      />
 
       <dialog
         className="brach-learn-dialog"

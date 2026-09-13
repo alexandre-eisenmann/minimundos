@@ -146,12 +146,7 @@ export function defaultAnchors(count = 4): CurvePoint[] {
     const x = index / (count - 1);
     return {
       x,
-      y:
-        index === 0
-          ? 0
-          : index === count - 1
-            ? 1
-            : Math.min(1, Math.sqrt(x) * 1.02),
+      y: x,
     };
   });
 }

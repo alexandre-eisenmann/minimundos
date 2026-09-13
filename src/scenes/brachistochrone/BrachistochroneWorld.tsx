@@ -8,6 +8,7 @@ import { HumanCharacter } from '../assets/HumanCharacter';
 import { PlayerBeacon } from '../assets/PlayerBeacon';
 import { SceneCamera } from '../assets/SceneCamera';
 import { GableRoof, House } from '../assets/Architecture';
+import Fox from '../assets/Fox';
 import { Birds, Boulder, Clouds, Tree } from '../assets/Nature';
 import { Ripples, WaterSurface } from '../assets/Water';
 import { CROSSING, crossingHeight } from './crossing';
@@ -53,14 +54,13 @@ const START_X = CLIFF_X;
 const TOP_Y = 6.2;
 const FINISH_X = START_X + WIDTH;
 const FINISH_Y = TOP_Y - DROP;
-export const laneKinds = ['line', 'parabola', 'cycloid', 'custom'] as const;
+export const laneKinds = ['parabola', 'cycloid', 'custom'] as const;
 export const laneNames = [
-  'Straight',
   'Parabola',
   'Brachistochrone',
   'Your curve',
 ];
-const laneZ = [-3.45, -1.15, 1.15, 3.45];
+const laneZ = [-2.6, 0, 2.6];
 
 /** Level track either side of the timed section: a holding road on the launch
  *  deck, and a runout the carts coast along instead of stopping dead. */
@@ -83,7 +83,7 @@ const LAUNCH_ROLL = 1.15;
 
 /**
  * The straight lane is the upper envelope of every descent, so a chord raised
- * above it clears all four tracks. One gantry hangs from that chord and each
+ * above it clears all three tracks. One gantry hangs from that chord and each
  * lane differs only in how far its rails sag below it.
  */
 const CHORD_LIFT = 1.15;
@@ -114,13 +114,12 @@ const stone = {
   coping: '#c2b48b',
   wall: '#918e76',
 };
-/** One tone per lane, warming across the rig, so the four read apart. The
- *  brachistochrone gets the brass so it stands out as the answer. */
+/** Painted rails and carts tie each comparison to its lane. */
+const lanePaint = ['#438b9b', '#d6a33d', '#c66749'];
 const laneTimber = [
-  { rail: '#bda876', shade: '#9a8556', tie: '#d9c89b' },
-  { rail: '#c69a55', shade: '#a37a3c', tie: '#e0c58d' },
-  { rail: '#d8a83f', shade: '#b3832a', tie: '#f0d68e' },
-  { rail: '#cb8f45', shade: '#a97431', tie: '#e6c489' },
+  { rail: '#438b9b', shade: '#346978', tie: '#c8b99a' },
+  { rail: '#d6a33d', shade: '#a47c32', tie: '#dfc998' },
+  { rail: '#c66749', shade: '#914e3c', tie: '#d6b38d' },
 ];
 
 function worldPoint(point: CurvePoint, z: number): Point {
@@ -820,27 +819,33 @@ const Bluff = memo(function Bluff() {
   const scatter = useMemo(() => {
     const pines: { p: Point; s: number }[] = [];
     const rocks: { p: Point; s: number }[] = [];
-    for (let i = 0; i < 260; i++) {
+    for (let i = 0; i < 1100; i++) {
       const { x, z } = scatterPoint(i, -15.4, -5.2, -11.2, 11.2);
       const y = landHeight(x, z);
       const flat = landNormalY(x, z);
-      if (y < 0.3 || flat < 0.42) continue;
+      const pathDistance = nearestOnPath(x, z).distance;
+      const besideClimb = z > 5.2 && pathDistance > 1.15 && pathDistance < 4.6;
+      if (y < 0.3 || flat < (besideClimb ? 0.2 : 0.36)) continue;
+      // Concentrate the woodland on the visible switchback flank.
+      if (!besideClimb && i % 3 !== 0) continue;
       // Keep the worked terrace and the walking path clear.
-      if (y > TERRACE_Y - 0.2) continue;
-      if (nearestOnPath(x, z).distance < 1.8) continue;
+      if (y > TERRACE_Y - 0.2 && x > -11.5 && Math.abs(z) < 5.2) continue;
+      if (pathDistance < (besideClimb ? 1.15 : 1.8)) continue;
       if (inWaterWorks(x, z)) continue;
-      if (pines.some((pine) => Math.hypot(pine.p[0] - x, pine.p[2] - z) < 0.95))
+      if (x > -14 && x < -10.7 && z > -2.5 && z < 1.25) continue;
+      if (pines.some((pine) => Math.hypot(pine.p[0] - x, pine.p[2] - z) < (besideClimb ? 0.83 : 1.15)))
         continue;
-      if (i % 4 === 0 && y > 4.4)
+      if (!besideClimb && i % 4 === 0 && y > 4.4)
         rocks.push({ p: [x, y + 0.14, z], s: 0.28 + ((i * 5) % 7) * 0.06 });
-      else pines.push({ p: [x, y - 0.05, z], s: 0.5 + ((i * 7) % 9) * 0.055 });
+      else pines.push({ p: [x, y - 0.05, z], s: (besideClimb ? 0.46 : 0.5) + ((i * 7) % 9) * 0.055 });
     }
     return { pines, rocks };
   }, []);
   return (
     <group name="bluff">
+      <Fox p={[-12.3, landHeight(-12.3, -0.3), -0.3]} rotation={-0.7} scale={0.95} roam={{ radiusX: 0.28, radiusZ: 0.85, heightAt: landHeight }} />
       {scatter.pines.map((pine, i) => (
-        <Tree key={i} p={pine.p} scale={pine.s} pine={i % 4 !== 0} />
+        <Tree key={i} p={pine.p} scale={pine.s} pine={i % 3 === 0} slender={i % 3 === 1} />
       ))}
       {scatter.rocks.map((rock, i) => (
         <Boulder key={i} p={rock.p} scale={[rock.s, rock.s * 0.72, rock.s]} />
@@ -1324,7 +1329,7 @@ function GateLever({
   );
 }
 
-/** The shared launch house: one roof, one deck, four gates, one lever. */
+/** The shared launch house: one roof, one deck, three gates, one lever. */
 const LaunchHouse = memo(function LaunchHouse({
   gateOpen,
   onToggleGate,
@@ -1360,7 +1365,7 @@ const LaunchHouse = memo(function LaunchHouse({
           />
         )),
       )}
-      {/* Plate beams and one shed roof over all four gates and the queues. */}
+      {/* Plate beams and one shed roof over all three gates and the queues. */}
       {[west + 0.35, CLIFF_X - 0.35].map((x) => (
         <Beam
           key={`plate-${x}`}
@@ -1523,7 +1528,7 @@ const LandingStage = memo(function LandingStage() {
  * hill in two falls with plunge pools and a leat across the worked terrace
  * between them, and is tipped by a launder onto the wheel standing in the
  * quarried pit. The wheel drives a line shaft that winds the carts back up,
- * and its tail water runs north under all four tracks to the canal.
+ * and its tail water runs north under all three tracks to the canal.
  */
 
 /**
@@ -1868,7 +1873,7 @@ function WheelPit() {
 }
 
 /**
- * An open channel from the pit, under the four tracks, into the canal. One
+ * An open channel from the pit, under the three tracks, into the canal. One
  * stream therefore drives the wheel and then becomes the river.
  */
 function TailRace() {
@@ -2492,17 +2497,17 @@ function WaterLift() {
  *  running through the rider. */
 const CART_HITCH = { x: -0.46, y: 0.35 };
 
-function Cart() {
+function Cart({ color }: { color: string }) {
   return (
     <>
       <Slab p={[0, 0.35, 0]} s={[0.86, 0.1, 0.72]} c={timber.deck} />
-      <Slab p={[-0.42, 0.46, 0]} s={[0.09, 0.28, 0.72]} c={timber.beam} />
+      <Slab p={[-0.42, 0.46, 0]} s={[0.09, 0.28, 0.72]} c={color} />
       {[-0.37, 0.37].map((wz) => (
         <Slab
           key={wz}
           p={[0, 0.44, wz]}
           s={[0.84, 0.18, 0.07]}
-          c={timber.beam}
+          c={color}
         />
       ))}
       <mesh position={[CART_HITCH.x, CART_HITCH.y, 0]} rotation={[0, Math.PI / 2, 0]} castShadow>
@@ -2753,7 +2758,7 @@ function Lane({
             )),
           )}
         </group>
-        <Cart />
+        <Cart color={lanePaint[lane]} />
         <group
           ref={rider}
           position={[0, 0.4, 0]}

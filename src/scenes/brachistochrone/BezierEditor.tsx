@@ -1,14 +1,11 @@
 import { useRef, type PointerEvent } from 'react';
-import { Minus, Plus, SlidersHorizontal } from 'lucide-react';
+import { Minus, Plus, RotateCcw, X } from 'lucide-react';
 import type { CurvePoint } from './curveMath';
-import { resizeAnchors, sampleBezierSpline, sampleCurve } from './curveMath';
+import { defaultAnchors, resizeAnchors, sampleBezierSpline } from './curveMath';
 
 const WIDTH = 320;
 const HEIGHT = 190;
 const PAD = 16;
-/** The rig's run over its drop, so the reference curve matches the lane. */
-const ASPECT = 2;
-
 export default function BezierEditor({
   anchors,
   onChange,
@@ -33,15 +30,14 @@ export default function BezierEditor({
         return `${index ? 'L' : 'M'}${screen.x.toFixed(1)} ${screen.y.toFixed(1)}`;
       })
       .join(' ');
-  const reference = trace(sampleCurve('cycloid', anchors, 90, ASPECT));
   const path = trace(points);
 
   function move(event: PointerEvent<SVGSVGElement>) {
     const index = dragging.current;
     if (index === null || index === 0 || index === anchors.length - 1) return;
     const rect = event.currentTarget.getBoundingClientRect();
-    const x = (event.clientX - rect.left) / rect.width;
-    const y = (event.clientY - rect.top) / rect.height;
+    const x = ((event.clientX - rect.left) / rect.width * WIDTH - PAD) / (WIDTH - PAD * 2);
+    const y = ((event.clientY - rect.top) / rect.height * HEIGHT - PAD) / (HEIGHT - PAD * 2);
     const next = anchors.map((point) => ({ ...point }));
     next[index] = {
       x: Math.max(
@@ -53,20 +49,21 @@ export default function BezierEditor({
     onChange(next);
   }
 
+  if (!open) return null;
+
   return (
     <section
-      className={`curve-editor ${open ? 'open' : 'collapsed'}`}
+      id="curve-editor"
+      className="curve-editor"
       aria-labelledby="curve-editor-title"
     >
       <button
-        className="curve-editor-toggle"
+        className="curve-editor-close"
         type="button"
         onClick={onToggle}
-        aria-label={open ? 'Collapse curve editor' : 'Open curve editor'}
-        aria-expanded={open}
+        aria-label="Close curve editor"
       >
-        <SlidersHorizontal size={18} />
-        <span>{open ? 'Close' : 'Tune'}</span>
+        <X size={18} />
       </button>
       <div className="curve-editor-heading">
         <div>
@@ -97,6 +94,7 @@ export default function BezierEditor({
         </div>
       </div>
       <svg
+        preserveAspectRatio="none"
         viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
         onPointerMove={move}
         onPointerUp={(event) => {
@@ -129,8 +127,6 @@ export default function BezierEditor({
           rx="12"
           fill="url(#workbench-grid)"
         />
-        {/* The true brachistochrone, to draw against. */}
-        <path d={reference} className="editor-reference" />
         <path d={path} className="editor-curve-shadow" />
         <path d={path} className="editor-curve" />
         {anchors.map((point, index) => {
@@ -163,9 +159,17 @@ export default function BezierEditor({
           );
         })}
       </svg>
+      <button
+        className="curve-editor-reset"
+        type="button"
+        onClick={() => onChange(defaultAnchors(anchors.length))}
+        title="Restore a straight ramp"
+      >
+        <RotateCcw size={15} /> Reset curve
+      </button>
       <p>
-        Drag the brass points. The wooden track changes as you draw. The dashed
-        line is the true brachistochrone — try to beat it.
+        Drag the brass points. Your coral track changes as you draw.
+        Experiment, then release the carts.
       </p>
     </section>
   );

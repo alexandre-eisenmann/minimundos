@@ -63,3 +63,13 @@ test('time lookup begins and finishes exactly on the endpoints', () => {
   assert.deepEqual(pointAtTime(curve, 0), curve.points[0]);
   assert.deepEqual(pointAtTime(curve, curve.duration), curve.points.at(-1));
 });
+
+test('the editable default is a straight descent at every control-point count', () => {
+  for (let count = 3; count <= 7; count++) {
+    const curve = sampleCurve('custom', defaultAnchors(count));
+    for (const point of curve) assert.ok(Math.abs(point.x - point.y) < 1e-9);
+    const straight = timeCurve(sampleCurve('line', []));
+    // The spline samples nonuniformly; midpoint integration differs slightly.
+    assert.ok(Math.abs(timeCurve(curve).duration - straight.duration) < 0.02);
+  }
+});

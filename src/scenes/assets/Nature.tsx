@@ -8,10 +8,12 @@ export function Tree({
   p,
   scale = 1,
   pine = false,
+  slender = false,
 }: {
   p: Point;
   scale?: number;
   pine?: boolean;
+  slender?: boolean;
 }) {
   const seed = p[0] * 3.71 + p[2] * 8.23;
   const crown = useMemo(() => {
@@ -79,7 +81,8 @@ export function Tree({
         ) : (
           <mesh
             geometry={crown}
-            position={[0, 1.57, 0]}
+            scale={slender ? [0.65, 1.45, 0.65] : 1}
+            position={[0, slender ? 1.85 : 1.57, 0]}
             castShadow
             receiveShadow
           >
