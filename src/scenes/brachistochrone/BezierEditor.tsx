@@ -35,9 +35,13 @@ export default function BezierEditor({
   function move(event: PointerEvent<SVGSVGElement>) {
     const index = dragging.current;
     if (index === null || index === 0 || index === anchors.length - 1) return;
-    const rect = event.currentTarget.getBoundingClientRect();
-    const x = ((event.clientX - rect.left) / rect.width * WIDTH - PAD) / (WIDTH - PAD * 2);
-    const y = ((event.clientY - rect.top) / rect.height * HEIGHT - PAD) / (HEIGHT - PAD * 2);
+    const transform = event.currentTarget.getScreenCTM();
+    if (!transform) return;
+    const position = new DOMPoint(event.clientX, event.clientY).matrixTransform(
+      transform.inverse(),
+    );
+    const x = (position.x - PAD) / (WIDTH - PAD * 2);
+    const y = (position.y - PAD) / (HEIGHT - PAD * 2);
     const next = anchors.map((point) => ({ ...point }));
     next[index] = {
       x: Math.max(
@@ -94,7 +98,7 @@ export default function BezierEditor({
         </div>
       </div>
       <svg
-        preserveAspectRatio="none"
+        preserveAspectRatio="xMidYMid meet"
         viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
         onPointerMove={move}
         onPointerUp={(event) => {

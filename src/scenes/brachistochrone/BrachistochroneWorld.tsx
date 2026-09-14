@@ -21,6 +21,8 @@ import {
   railCartPose,
 } from './rideMotion';
 import { Spillway } from '../assets/Spillway';
+import { WaterwheelWater } from '../assets/WaterwheelWater';
+import { WaterwheelFeed } from '../assets/WaterwheelFeed';
 import {
   CANAL,
   CANAL_BED,
@@ -60,7 +62,8 @@ export const laneNames = [
   'Brachistochrone',
   'Your curve',
 ];
-const laneZ = [-2.6, 0, 2.6];
+// Preserve each lane's identity and colour; the editable track is farthest away.
+const laneZ = [2.6, 0, -2.6];
 
 /** Level track either side of the timed section: a holding road on the launch
  *  deck, and a runout the carts coast along instead of stopping dead. */
@@ -81,18 +84,8 @@ const REST_TIME = 2.8;
 const RETURN_SPEED = 2.6;
 const LAUNCH_ROLL = 1.15;
 
-/**
- * The straight lane is the upper envelope of every descent, so a chord raised
- * above it clears all three tracks. One gantry hangs from that chord and each
- * lane differs only in how far its rails sag below it.
- */
-const CHORD_LIFT = 1.15;
-const chordY = (x: number) =>
-  TOP_Y - ((x - START_X) / WIDTH) * DROP + CHORD_LIFT;
-const FRAME_Z = 4.5;
-const bentX = [-4.15, -1.55, 1.05, 3.65];
-const CHORD_WEST = -6.9;
-const CHORD_EAST = 5.6;
+// Four short trestle spans bridge the tail race without placing feet in it.
+const trestleX = [-4.15, -1.55, 1.05, 3.65];
 
 const DECK_Y = TOP_Y - 0.1;
 const STAGE_Y = FINISH_Y - 0.09;
@@ -126,7 +119,7 @@ function worldPoint(point: CurvePoint, z: number): Point {
   return [START_X + point.x * WIDTH, TOP_Y - point.y * DROP, z];
 }
 
-/** Track height at a fraction of the run, for hangers and buffer stops. */
+/** Track height at a fraction of the run, for the trestle seats. */
 function heightAtRun(points: CurvePoint[], run: number) {
   for (let i = 1; i < points.length; i++)
     if (points[i].x >= run) {
@@ -832,6 +825,8 @@ const Bluff = memo(function Bluff() {
       if (y > TERRACE_Y - 0.2 && x > -11.5 && Math.abs(z) < 5.2) continue;
       if (pathDistance < (besideClimb ? 1.15 : 1.8)) continue;
       if (inWaterWorks(x, z)) continue;
+      // Leave room for foliage as well as trunks beside the wheel's inlet.
+      if (nearestOnPolyline(BENCH_LEAT.map(([x, y, z]) => ({ x, y, z })), x, z).distance < 1.15) continue;
       if (x > -14 && x < -10.7 && z > -2.5 && z < 1.25) continue;
       if (pines.some((pine) => Math.hypot(pine.p[0] - x, pine.p[2] - z) < (besideClimb ? 0.83 : 1.15)))
         continue;
@@ -982,105 +977,6 @@ const Meadow = memo(function Meadow() {
   );
 });
 
-// ----------------------------------------------------------------- the gantry
-
-const LEDGERS = [1.7, 3.5, 5.3];
-
-/**
- * Two side trusses and a ladder of cross beams at chord level. Everything
- * structural stays outboard of the lanes or above them, so all three tracks
- * are read against open air.
- */
-const Gantry = memo(function Gantry() {
-  return (
-    <group name="gantry">
-      {[-FRAME_Z, FRAME_Z].map((z) => (
-        <Beam
-          key={z}
-          a={[CHORD_WEST, chordY(CHORD_WEST), z]}
-          b={[CHORD_EAST, chordY(CHORD_EAST), z]}
-          w={0.19}
-          d={0.28}
-          c={timber.beam}
-        />
-      ))}
-      {bentX.map((x, bent) => {
-        const top = chordY(x);
-        const next = bentX[bent + 1];
-        return (
-          <group key={x}>
-            <Beam
-              a={[x, top, -FRAME_Z]}
-              b={[x, top, FRAME_Z]}
-              w={0.15}
-              d={0.19}
-              c={timber.beam}
-            />
-            {[-FRAME_Z, FRAME_Z].map((z) => (
-              <group key={z}>
-                <Beam
-                  a={[x, 0.02, z]}
-                  b={[x, top + 0.02, z]}
-                  w={0.2}
-                  c={timber.post}
-                />
-                <Slab p={[x, 0.09, z]} s={[0.5, 0.18, 0.5]} c={stone.pad} />
-                {/* Knee braces, tucked under the chord out of the sightline. */}
-                {[-1, 1].map((lean) => (
-                  <Beam
-                    key={lean}
-                    a={[x + lean * 0.05, top - 0.95, z]}
-                    b={[x + lean * 0.95, top - 0.1, z]}
-                    w={0.1}
-                    c={timber.brace}
-                  />
-                ))}
-                {next !== undefined &&
-                  (() => {
-                    const limit = Math.min(top, chordY(next)) - 0.9;
-                    const levels = LEDGERS.filter((y) => y < limit);
-                    return (
-                      <group>
-                        {levels.map((y) => (
-                          <Beam
-                            key={y}
-                            a={[x, y, z]}
-                            b={[next, y, z]}
-                            w={0.095}
-                            d={0.085}
-                            c={timber.brace}
-                          />
-                        ))}
-                        {/* One long brace per bay keeps the bays legible. */}
-                        <Beam
-                          a={[x, 0.12, z]}
-                          b={[next, levels.at(-1) ?? limit, z]}
-                          w={0.07}
-                          d={0.09}
-                          c={timber.brace}
-                        />
-                      </group>
-                    );
-                  })()}
-              </group>
-            ))}
-          </group>
-        );
-      })}
-      {/* The east end of each chord is footed on the landing stage. */}
-      {[-FRAME_Z, FRAME_Z].map((z) => (
-        <Beam
-          key={z}
-          a={[CHORD_EAST - 0.1, STAGE_Y, z]}
-          b={[CHORD_EAST - 0.1, chordY(CHORD_EAST - 0.1), z]}
-          w={0.18}
-          c={timber.post}
-        />
-      ))}
-    </group>
-  );
-});
-
 // ------------------------------------------------------------------ the tracks
 
 function Track({
@@ -1123,16 +1019,36 @@ function Track({
         }),
     [line, z],
   );
-  // Hangers to the shared chord: their length is the lane's whole story.
-  const hangers = useMemo(() => {
-    const stations = 12;
-    return Array.from({ length: stations }, (_, i) => {
-      const run = (i + 0.5) / stations;
-      const x = START_X + run * WIDTH;
-      const y = TOP_Y - heightAtRun(curve.points, run) * DROP;
-      return { x, y, top: chordY(x) - 0.2 };
-    }).filter((hanger) => hanger.top - hanger.y > 0.26);
-  }, [curve]);
+  // Continuous timber stringers sit directly below the sleepers. Their
+  // silhouette follows the actual curve, including edits to the custom lane.
+  const stringers = useMemo(() => [-0.33, 0.33].map((offset) => {
+    const positions: number[] = [];
+    const indices: number[] = [];
+    line.forEach(({ x, y }, i) => {
+      for (const [dy, dz] of [[-0.18, -0.075], [-0.44, -0.075], [-0.44, 0.075], [-0.18, 0.075]])
+        positions.push(x, y + dy, z + offset + dz);
+      if (i > 0) {
+        const a = (i - 1) * 4;
+        const b = i * 4;
+        for (let side = 0; side < 4; side++) {
+          const next = (side + 1) % 4;
+          indices.push(a + side, b + side, b + next, a + side, b + next, a + next);
+        }
+      }
+    });
+    const end = (line.length - 1) * 4;
+    indices.push(0, 1, 2, 0, 2, 3, end, end + 2, end + 1, end, end + 3, end + 2);
+    const geometry = new THREE.BufferGeometry();
+    geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+    geometry.setIndex(indices);
+    geometry.computeVertexNormals();
+    return geometry;
+  }), [line, z]);
+  const supports = useMemo(() => trestleX.map((x) => ({
+    x,
+    seat: TOP_Y - heightAtRun(curve.points, (x - START_X) / WIDTH) * DROP - 0.44,
+    foot: Math.max(landHeight(x, z - 0.33), landHeight(x, z + 0.33)),
+  })), [curve, z]);
   return (
     <group>
       {rails.map((geometry, index) => (
@@ -1152,23 +1068,34 @@ function Track({
           r={[0, 0, -tie.angle]}
         />
       ))}
-      {hangers.map((hanger, index) => (
-        <Beam
-          key={index}
-          a={[hanger.x, hanger.y + 0.02, z]}
-          b={[hanger.x, hanger.top, z]}
-          w={0.07}
-          c={timber.brace}
-        />
+      {stringers.map((geometry, index) => (
+        <mesh key={`stringer-${index}`} geometry={geometry} castShadow receiveShadow>
+          <meshStandardMaterial color={timber.beam} roughness={0.9} />
+        </mesh>
       ))}
-      {/* Longitudinal stringer the hangers are pinned to. */}
-      <Beam
-        a={[START_X - 0.6, chordY(START_X - 0.6) - 0.14, z]}
-        b={[CHORD_EAST, chordY(CHORD_EAST) - 0.14, z]}
-        w={0.12}
-        d={0.15}
-        c={timber.beam}
-      />
+      {supports.map(({ x, seat, foot }) => (
+        <group key={x}>
+          {/* A saddle bears both stringers; paired posts keep loads beneath
+              the rails instead of in an outboard frame across the view. */}
+          <Slab p={[x, seat - 0.08, z]} s={[0.3, 0.16, 0.98]} c={timber.beam} />
+          {[-0.33, 0.33].map((offset) => (
+            <group key={offset}>
+              <Slab p={[x, foot + 0.09, z + offset]} s={[0.38, 0.18, 0.38]} c={stone.pad} />
+              <Beam a={[x, foot + 0.16, z + offset]} b={[x, seat - 0.12, z + offset]} w={0.17} c={timber.post} />
+            </group>
+          ))}
+          {seat - foot > 1.2 && (
+            <Beam a={[x, seat - 1.02, z - 0.33]} b={[x, seat - 0.16, z + 0.33]} w={0.075} c={timber.brace} />
+          )}
+          {/* Short knees on the far stringer stiffen the tall bents along
+              the run. Each end follows the curve and stays below the rails. */}
+          {seat - foot > 1.5 && [-1, 1].map((side) => {
+            const endX = x + side * 0.55;
+            const endY = TOP_Y - heightAtRun(curve.points, (endX - START_X) / WIDTH) * DROP - 0.4;
+            return <Beam key={side} a={[x, Math.min(seat, endY) - 0.75, z - 0.33]} b={[endX, endY, z - 0.33]} w={0.09} c={timber.brace} />;
+          })}
+        </group>
+      ))}
       {/* Buffer stop and straw bale at the far end of the runout. */}
       <Slab
         p={[RUNOUT_X + 0.24, FINISH_Y + 0.2, z]}
@@ -1264,7 +1191,7 @@ function baysBetweenLanes(
 ): [number, number][] {
   const bays: [number, number][] = [];
   let cursor = from;
-  for (const z of laneZ) {
+  for (const z of [...laneZ].sort((a, b) => a - b)) {
     if (z - clearance > cursor + 0.25) bays.push([cursor, z - clearance]);
     cursor = Math.max(cursor, z + clearance);
   }
@@ -1549,19 +1476,14 @@ const PIT_POST_X = [-6.85, -2.95];
 const GEAR_Z = 9.88;
 /**
  * The launder, cantilevered off the pit's north lip to tip the stream onto the
- * wheel just west of the crown, which is what makes it turn.
+ * wheel east of the crown. Water's weight on this side drives it clockwise.
  */
 const LAUNDER = {
-  head: [-5.85, 6.14, 6.62] as Point,
-  mouth: [-6.25, 6.06, 8.05] as Point,
+  head: [-3.05, 6.14, 6.62] as Point,
+  mouth: [-3.05, 6.06, 7.72] as Point,
 };
-/** Where the launder tips onto the rim, just west of the crown, on the
- *  near cheek so the pour is in front of the wheel rather than behind it. */
-const FEED: Point = [
-  LAUNDER.mouth[0],
-  WHEEL.y + Math.sqrt((WHEEL.r - 0.06) ** 2 - (LAUNDER.mouth[0] - WHEEL.x) ** 2),
-  8.45,
-];
+/** The bucket centre passing beneath the inlet sets the filling phase. */
+const WHEEL_FEED_ANGLE = Math.acos((LAUNDER.mouth[0] - WHEEL.x) / (WHEEL.r - 0.3));
 /**
  * The haulage. A line shaft under the launch house roof, chained to the wheel
  * and carrying one winding drum per lane; each rope runs east over a sheave on
@@ -2089,15 +2011,14 @@ function DriveChain({ turn }: { turn: MutableRefObject<number> }) {
   );
 }
 
-/** Short pour from the launder mouth onto the west rim. No plunge pool. */
+/** Continuous pour onto the descending buckets, clear of the back shroud. */
 function LaunderFeed() {
-  return <Spillway from={[LAUNDER.mouth[0], LAUNDER.mouth[1] + 0.12, LAUNDER.mouth[2]]} to={FEED} width={0.72} foam={false} />;
+  return <WaterwheelFeed from={[LAUNDER.mouth[0], LAUNDER.mouth[1] + 0.12, LAUNDER.mouth[2]]} center={[WHEEL.x, WHEEL.y, WHEEL.z]} radius={WHEEL.r - 0.3} feedAngle={WHEEL_FEED_ANGLE} />;
 }
 
 /** The bucket wheel, its frame, the line shaft and the ropes that haul. */
 function WaterLift() {
   const wheel = useRef<THREE.Group>(null);
-  const fill = useRef<THREE.Group>(null);
   const axleGear = useRef<THREE.Group>(null);
   const spur = useRef<THREE.Group>(null);
   const shaft = useRef<THREE.Group>(null);
@@ -2113,14 +2034,10 @@ function WaterLift() {
     [],
   );
   useFrame(({ clock }) => {
-    turn.current = clock.elapsedTime * 0.3;
+    turn.current = -clock.elapsedTime * 0.3;
     const at = turn.current;
     if (wheel.current) wheel.current.rotation.z = at;
     if (axleGear.current) axleGear.current.rotation.z = at;
-    fill.current?.children.forEach((load, i) => {
-      const angle = (buckets[i].angle + at) % (Math.PI * 2);
-      load.visible = angle > 1.86 && angle < 4.05;
-    });
     if (spur.current) spur.current.rotation.z = -at * PINION_RATIO;
     if (shaft.current) shaft.current.rotation.z = -at * SHAFT_RATIO;
     const sheaveSpin = -at * SHAFT_RATIO * (0.22 / SHEAVE.r);
@@ -2143,6 +2060,10 @@ function WaterLift() {
         boarded
       />
       <LaunderFeed />
+      <WaterwheelWater center={[WHEEL.x, WHEEL.y, WHEEL.z]} radius={WHEEL.r - 0.3} halfWidth={WHEEL.halfWidth} feedAngle={WHEEL_FEED_ANGLE} pondY={PIT_WATER} />
+      {/* A saddle and extension of the rear bent carry the trough lip. */}
+      <Beam a={[-2.95, WHEEL.y + 0.55, BENT_Z[0]]} b={[-2.95, 5.84, BENT_Z[0]]} w={0.26} c={timber.post} />
+      <Beam a={[-3.65, 5.75, BENT_Z[0]]} b={[-2.45, 5.75, BENT_Z[0]]} w={0.18} d={0.26} c={timber.beam} />
 
       {BENT_Z.map((z) => (
         <group key={z}>
@@ -2205,7 +2126,7 @@ function WaterLift() {
         />
       ))}
 
-      {/* The wheel: shrouds, sole boards, spokes and sixteen deep buckets. */}
+      {/* The wheel: shrouds, sole boards, spokes and twenty-two deep buckets. */}
       <group ref={wheel} position={[WHEEL.x, WHEEL.y, WHEEL.z]}>
         {[-WHEEL.halfWidth, WHEEL.halfWidth].map((z) => (
           <group key={z}>
@@ -2282,27 +2203,7 @@ function WaterLift() {
             />
           </group>
         ))}
-        {/* The loads the buckets carry, shown only between the flume and the
-            pond. They ride with the wheel but are switched by world angle. */}
-        <group ref={fill}>
-          {buckets.map(({ angle, x, y }, i) => (
-            <group
-              key={i}
-              position={[x * (WHEEL.r - 0.3), y * (WHEEL.r - 0.3), 0]}
-              rotation={[0, 0, angle]}
-            >
-              <mesh position={[-0.02, 0.12, 0]}>
-                <boxGeometry args={[0.44, 0.18, WHEEL.halfWidth * 2 - 0.2]} />
-                <meshStandardMaterial
-                  color={water.bright}
-                  emissive={water.deep}
-                  emissiveIntensity={0.24}
-                  roughness={0.24}
-                />
-              </mesh>
-            </group>
-          ))}
-        </group>
+
       </group>
       <mesh
         position={[WHEEL.x, WHEEL.y, WHEEL.z]}
@@ -2472,7 +2373,7 @@ function WaterLift() {
           <mesh
             key={i}
             position={[
-              WHEEL.x - 2.4 + i * 0.32,
+              WHEEL.x + 2.4 - i * 0.32,
               PIT_WATER,
               WHEEL.z - 0.42 + (i % 3) * 0.36,
             ]}
@@ -3168,7 +3069,6 @@ export default function BrachistochroneWorld({
           <ClimbPath />
           <Meadow />
           <Town />
-          <Gantry />
           <LaunchHouse gateOpen={gateOpen} onToggleGate={onToggleGate} />
           <LandingStage />
           {curves.map((curve, lane) => (

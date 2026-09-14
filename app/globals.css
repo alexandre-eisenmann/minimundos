@@ -128,7 +128,7 @@ a:focus-visible {
   outline: 2px solid #ffe0a1;
   outline-offset: 3px;
 }
-button:hover:not(:disabled):not(.bridge-marker) {
+button:hover:not(:disabled):not(.bridge-marker):not(.launch-action) {
   background-color: #35535b;
 }
 .game {
@@ -1433,8 +1433,10 @@ p {
 }
 .point-stepper {
   display: grid;
-  grid-template-columns: 30px 28px 30px;
+  grid-template-columns: repeat(3, 32px);
+  flex-shrink: 0;
   align-items: center;
+  background: #13292d;
   border: 1px solid #d9bd8055;
   border-radius: 9px;
   overflow: hidden;
@@ -1442,8 +1444,9 @@ p {
 .point-stepper button {
   display: grid;
   place-items: center;
-  width: 30px;
-  height: 30px;
+  width: 32px;
+  height: 32px;
+  padding: 0;
   border: 0;
   background: #13292d;
   color: #f0d69b;
@@ -1452,6 +1455,11 @@ p {
   color: #788a85;
 }
 .point-stepper strong {
+  display: grid;
+  place-items: center;
+  height: 32px;
+  border-inline: 1px solid #d9bd8026;
+  font-variant-numeric: tabular-nums;
   text-align: center;
   font-size: 13px;
 }
