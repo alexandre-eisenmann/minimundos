@@ -6,7 +6,9 @@ import {
   useState,
   type ReactNode,
 } from 'react';
-import { BookOpen, Hammer, Play, X } from 'lucide-react';
+import { BookOpen, Hammer, Play, Volume2, VolumeX, X } from 'lucide-react';
+import { CartSound } from '../assets/CartSound';
+import { useSoundPreference } from '../../game/sound';
 import type { MovementInput } from '../../game/movement';
 import MovementJoystick from '../assets/MovementJoystick';
 import BezierEditor from './BezierEditor';
@@ -34,12 +36,28 @@ class SceneBoundary extends Component<
 }
 
 export default function BrachistochroneExperience() {
+  const [soundEnabled, setSoundEnabled] = useSoundPreference();
+  const [cartSound] = useState(() => new CartSound());
   const [anchors, setAnchors] = useState<CurvePoint[]>(() => defaultAnchors(4));
   const [gateOpen, setGateOpen] = useState(false);
 
   const [running, setRunning] = useState([true, true, true]);
   const [learnOpen, setLearnOpen] = useState(false);
   const [editorOpen, setEditorOpen] = useState(false);
+  useEffect(() => {
+    const sync = () => cartSound.setEnabled(soundEnabled && !learnOpen && !document.hidden);
+    const unlock = () => { sync(); cartSound.unlock(); };
+    sync();
+    window.addEventListener('pointerdown', unlock);
+    window.addEventListener('keydown', unlock);
+    document.addEventListener('visibilitychange', sync);
+    return () => {
+      window.removeEventListener('pointerdown', unlock);
+      window.removeEventListener('keydown', unlock);
+      document.removeEventListener('visibilitychange', sync);
+    };
+  }, [cartSound, soundEnabled, learnOpen]);
+  useEffect(() => () => cartSound.dispose(), [cartSound]);
   const input = useRef<MovementInput>({ x: 0, z: 0 });
   const gateTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const busy = useRef(true);
@@ -79,6 +97,17 @@ export default function BrachistochroneExperience() {
           MiniMundos
         </a>
         <div className="topbar-actions">
+          <button className="learn-button" type="button"
+            aria-label={soundEnabled ? 'Mute cart sounds' : 'Turn on cart sounds'}
+            aria-pressed={soundEnabled}
+            onClick={() => {
+              cartSound.setEnabled(!soundEnabled);
+              if (!soundEnabled) cartSound.unlock();
+              setSoundEnabled(!soundEnabled);
+            }}>
+            {soundEnabled ? <Volume2 size={20} /> : <VolumeX size={20} />}
+            <span>Sound</span>
+          </button>
           <button
             className="learn-button"
             type="button"
@@ -109,6 +138,7 @@ export default function BrachistochroneExperience() {
       <div className="world">
         <SceneBoundary>
           <BrachistochroneWorld
+            cartSound={cartSound}
             anchors={anchors}
             gateOpen={gateOpen}
             input={input}

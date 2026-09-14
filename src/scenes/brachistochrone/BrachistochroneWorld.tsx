@@ -1,3 +1,4 @@
+import type { CartSound } from '../assets/CartSound';
 import { Suspense, memo, useMemo, useRef, useState, type MutableRefObject } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import * as THREE from 'three';
@@ -2489,6 +2490,7 @@ function ArrivingPassenger({ lane, z, start, climb, onDone }: {
 }
 
 function Lane({
+  cartSound,
   curve,
   z,
   lane,
@@ -2498,6 +2500,7 @@ function Lane({
   onDepart,
   onReady,
 }: {
+  cartSound: CartSound;
   curve: TimedCurve;
   z: number;
   lane: number;
@@ -2507,6 +2510,8 @@ function Lane({
   onDepart: (lane: number) => void;
   onReady: (lane: number) => void;
 }) {
+  const lastPosition = useRef<THREE.Vector3 | null>(null);
+  const projected = useMemo(() => new THREE.Vector3(), []);
   const cart = useRef<THREE.Group>(null);
   const wheels = useRef<THREE.Group>(null);
   const rider = useRef<THREE.Group>(null);
@@ -2526,7 +2531,7 @@ function Lane({
     return { line, table, total: table[table.length - 1] - (RUNOUT_X - FINISH_X - COAST_DISTANCE) };
   }, [curve]);
 
-  useFrame(({ clock }) => {
+  useFrame(({ clock, camera }, delta) => {
     if (!cart.current) return;
     if (since.current < 0) since.current = clock.elapsedTime;
     let t = clock.elapsedTime - since.current;
@@ -2606,6 +2611,15 @@ function Lane({
     x = pose.x;
     y = pose.y;
     cart.current.position.set(x, y, z);
+    const position = cart.current.position;
+    const speed = lastPosition.current && delta > 0 && delta < 0.2
+      ? position.distanceTo(lastPosition.current) / delta : 0;
+    const moving = ['approach', 'run', 'coast', 'back'].includes(leg.current);
+    projected.copy(position).project(camera);
+    cartSound.update(lane, moving ? speed : 0, leg.current === 'back', delta,
+      projected.x, camera.position.distanceTo(position));
+    if (!lastPosition.current) lastPosition.current = new THREE.Vector3();
+    lastPosition.current.copy(position);
     cart.current.rotation.z = pose.pitch;
     wheels.current?.children.forEach(wheel => { wheel.rotation.y = -x / 0.1; });
 
@@ -2996,6 +3010,7 @@ const sky = [
 ];
 
 export default function BrachistochroneWorld({
+  cartSound,
   anchors,
   gateOpen,
   input,
@@ -3006,6 +3021,7 @@ export default function BrachistochroneWorld({
   onDepart,
   onReady,
 }: {
+  cartSound: CartSound;
   anchors: CurvePoint[];
   gateOpen: boolean;
   input: MutableRefObject<MovementInput>;
@@ -3076,6 +3092,7 @@ export default function BrachistochroneWorld({
               <Track curve={curve} z={laneZ[lane]} lane={lane} />
               <StartGate z={laneZ[lane]} open={gateOpen} />
               <Lane
+                cartSound={cartSound}
                 curve={curve}
                 z={laneZ[lane]}
                 lane={lane}

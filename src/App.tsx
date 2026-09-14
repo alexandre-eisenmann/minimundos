@@ -47,7 +47,7 @@ export default function App() {
         <button
           className="sound-toggle"
           type="button"
-          aria-label={soundEnabled ? 'Mute walking sounds' : 'Turn on walking sounds'}
+          aria-label={soundEnabled ? 'Mute sounds' : 'Turn on sounds'}
           aria-pressed={soundEnabled}
           onClick={() => setSoundEnabled(!soundEnabled)}
         >
