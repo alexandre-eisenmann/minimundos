@@ -1,3 +1,4 @@
+import MiniMundosWordmark from '../assets/MiniMundosWordmark';
 import {
   Component,
   useCallback,
@@ -94,7 +95,7 @@ export default function BrachistochroneExperience() {
           href={import.meta.env.BASE_URL}
           aria-label="MiniMundos — all worlds"
         >
-          MiniMundos
+          <MiniMundosWordmark />
         </a>
         <div className="topbar-actions">
           <button className="learn-button" type="button"

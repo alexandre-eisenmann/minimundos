@@ -1,3 +1,4 @@
+import MiniMundosWordmark from './assets/MiniMundosWordmark';
 import TallyMarquee from './assets/TallyMarquee';
 import MovementJoystick from './assets/MovementJoystick';
 import type { MovementInput } from '../game/movement';
@@ -420,7 +421,7 @@ export default function KonigsbergExperience() {
         </form>
       </dialog>
       <header className="topbar">
-            <a className="brand" href={import.meta.env.BASE_URL} aria-label="MiniMundos — all worlds">MiniMundos</a>
+            <a className="brand" href={import.meta.env.BASE_URL} aria-label="MiniMundos — all worlds"><MiniMundosWordmark /></a>
             <div className="topbar-actions">
               <button className="compact-control" onClick={chooseStart} aria-label="New walk — choose starting point" title="New walk">
                 <RotateCcw size={18} /><span>New walk</span>

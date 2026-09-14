@@ -9,6 +9,15 @@
       "description": "Can you cross every bridge exactly once? Enter a tiny historical world and discover the idea that began graph theory.",
       "image": "/minimundos-social-card.png",
       "imageAlt": "MiniMundos miniature map of Königsberg, with seven bridges connecting four areas of land."
+    },
+    "atlas": {
+      "title": "Seven bridges. One impossible walk?",
+      "place": "Königsberg, Prussia",
+      "subjects": ["Mathematics", "History"],
+      "question": "Can you cross every bridge exactly once?",
+      "description": "Wander a river city, trace your own route, and discover the deceptively simple puzzle that opened a new branch of mathematics.",
+      "image": "/konigsberg-atlas.png",
+      "imageAlt": "The playable miniature Königsberg: a river city of tree-lined islands, terracotta roofs and wooden bridges."
     }
   },
   {
@@ -21,6 +30,15 @@
       "description": "Shape a wooden track, release three riders together, and discover the curve of fastest descent.",
       "image": "/minimundos-social-card.png",
       "imageAlt": "A miniature mathematical world."
+    },
+    "atlas": {
+      "title": "The fastest way isn’t the straightest.",
+      "place": "Groningen, Dutch Republic",
+      "subjects": ["Mathematics", "Physics", "History"],
+      "question": "Which curve wins the race to the bottom?",
+      "description": "Step into an imagined workshop inspired by Bernoulli’s 1696 challenge. Shape a track, release the riders, and put your intuition to the test.",
+      "image": "/brachistochrone-atlas.png",
+      "imageAlt": "The playable miniature workshop with curved racing tracks, a waterwheel, and a wooded landscape."
     }
   }
 ]

@@ -157,11 +157,21 @@ button:hover:not(:disabled):not(.bridge-marker):not(.launch-action) {
   pointer-events: none;
 }
 .brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+  white-space: nowrap;
   font-family: 'Mystery Quest', Georgia, serif;
   font-size: 25px;
   line-height: 1;
   letter-spacing: 0;
   color: #efddba;
+}
+.brand > svg {
+  width: 1em;
+  height: 1em;
+  flex-shrink: 0;
 }
 .scene-name {
   border-left: 1px solid #8da59a50;

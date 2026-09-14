@@ -34,6 +34,7 @@ jobs:
       - run: pnpm build:pages
         env:
           VITE_BASE_PATH: /minimundos/
+          SITE_URL: https://alexandre-eisenmann.github.io/minimundos/
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
