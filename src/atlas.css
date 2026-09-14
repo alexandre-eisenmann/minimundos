@@ -165,10 +165,9 @@
 }
 .atlas-carousel {
   overflow: hidden;
-  border: 1px solid #244a43;
   border-radius: 20px 20px 20px 5px;
   background: #17333d;
-  box-shadow: 5px 6px 0 #d2dbc4;
+  box-shadow: 0 6px 24px #173e4010;
 }
 .atlas-track {
   display: flex;
@@ -248,7 +247,6 @@
   align-items: flex-start;
   justify-content: center;
   position: relative;
-  border-left: 1px dashed #adbb9f;
 }
 .world-coordinates {
   display: flex;
@@ -578,7 +576,6 @@
   }
   .atlas-carousel {
     border-radius: 14px 14px 14px 4px;
-    box-shadow: 3px 4px 0 #d2dbc4;
   }
   .atlas-slide {
     grid-template-columns: 1fr;
@@ -592,8 +589,6 @@
   }
   .world-story {
     padding: 25px;
-    border-left: 0;
-    border-top: 1px dashed #adbb9f;
   }
   .world-topics {
     margin: 18px 0 13px;
