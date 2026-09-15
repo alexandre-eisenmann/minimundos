@@ -71,7 +71,16 @@ export class CartSound {
           return { roll, haul, filter, creak, pan, distance: 0 };
         });
       }
-      if (this.context.state !== 'running') void this.context.resume().catch(() => {});
+      if (this.context.state !== 'running') {
+        // Start a fresh source inside the gesture as well as resuming: mobile
+        // WebKit can suspend/interrupt an already-created audio graph.
+        const pulse = this.context.createBufferSource();
+        pulse.buffer = this.context.createBuffer(1, 1, this.context.sampleRate);
+        pulse.connect(this.context.destination);
+        pulse.onended = () => pulse.disconnect();
+        pulse.start();
+        void this.context.resume().catch(() => {});
+      }
     } catch {
       // Audio is optional on devices without Web Audio support.
       this.dispose();

@@ -11,11 +11,13 @@ export default function BezierEditor({
   onChange,
   open,
   onToggle,
+  disabled = false,
 }: {
   anchors: CurvePoint[];
   onChange: (anchors: CurvePoint[]) => void;
   open: boolean;
   onToggle: () => void;
+  disabled?: boolean;
 }) {
   const dragging = useRef<number | null>(null);
   const points = sampleBezierSpline(anchors, 90);
@@ -34,7 +36,7 @@ export default function BezierEditor({
 
   function move(event: PointerEvent<SVGSVGElement>) {
     const index = dragging.current;
-    if (index === null || index === 0 || index === anchors.length - 1) return;
+    if (disabled || index === null || index === 0 || index === anchors.length - 1) return;
     const transform = event.currentTarget.getScreenCTM();
     if (!transform) return;
     const position = new DOMPoint(event.clientX, event.clientY).matrixTransform(
@@ -81,7 +83,7 @@ export default function BezierEditor({
           <button
             type="button"
             aria-label="Remove a control point"
-            disabled={anchors.length <= 3}
+            disabled={disabled || anchors.length <= 3}
             onClick={() => onChange(resizeAnchors(anchors, anchors.length - 1))}
           >
             <Minus size={15} />
@@ -90,7 +92,7 @@ export default function BezierEditor({
           <button
             type="button"
             aria-label="Add a control point"
-            disabled={anchors.length >= 7}
+            disabled={disabled || anchors.length >= 7}
             onClick={() => onChange(resizeAnchors(anchors, anchors.length + 1))}
           >
             <Plus size={15} />
@@ -152,7 +154,7 @@ export default function BezierEditor({
                 aria-valuemax={100}
                 aria-valuenow={Math.round(point.y * 100)}
                 onPointerDown={(event) => {
-                  if (fixed) return;
+                  if (fixed || disabled) return;
                   dragging.current = index;
                   event.currentTarget.ownerSVGElement?.setPointerCapture(
                     event.pointerId,
@@ -168,12 +170,13 @@ export default function BezierEditor({
         type="button"
         onClick={() => onChange(defaultAnchors(anchors.length))}
         title="Restore a straight ramp"
+        disabled={disabled}
       >
         <RotateCcw size={15} /> Reset curve
       </button>
       <p>
-        Drag the brass points. Your coral track changes as you draw.
-        Experiment, then release the carts.
+        {disabled ? 'Wait for the carts to return before reshaping the track.' :
+          'Drag the brass points. Your coral track changes as you draw. Experiment, then release the carts.'}
       </p>
     </section>
   );

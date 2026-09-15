@@ -13,7 +13,7 @@ import { useSoundPreference } from '../../game/sound';
 import type { MovementInput } from '../../game/movement';
 import MovementJoystick from '../assets/MovementJoystick';
 import BezierEditor from './BezierEditor';
-import BrachistochroneWorld from './BrachistochroneWorld';
+import BrachistochroneWorld, { laneNames } from './BrachistochroneWorld';
 import { defaultAnchors, type CurvePoint } from './curveMath';
 
 class SceneBoundary extends Component<
@@ -41,6 +41,8 @@ export default function BrachistochroneExperience() {
   const [cartSound] = useState(() => new CartSound());
   const [anchors, setAnchors] = useState<CurvePoint[]>(() => defaultAnchors(4));
   const [gateOpen, setGateOpen] = useState(false);
+  const [finishTimes, setFinishTimes] = useState<(number | null)[]>([null, null, null]);
+  const [racing, setRacing] = useState([false, false, false]);
 
   const [running, setRunning] = useState([true, true, true]);
   const [learnOpen, setLearnOpen] = useState(false);
@@ -49,12 +51,16 @@ export default function BrachistochroneExperience() {
     const sync = () => cartSound.setEnabled(soundEnabled && !learnOpen && !document.hidden);
     const unlock = () => { sync(); cartSound.unlock(); };
     sync();
-    window.addEventListener('pointerdown', unlock);
-    window.addEventListener('keydown', unlock);
+    window.addEventListener('pointerdown', unlock, { capture: true });
+    window.addEventListener('touchend', unlock, { capture: true, passive: true });
+    window.addEventListener('click', unlock, { capture: true });
+    window.addEventListener('keydown', unlock, { capture: true });
     document.addEventListener('visibilitychange', sync);
     return () => {
-      window.removeEventListener('pointerdown', unlock);
-      window.removeEventListener('keydown', unlock);
+      window.removeEventListener('pointerdown', unlock, { capture: true });
+      window.removeEventListener('touchend', unlock, { capture: true });
+      window.removeEventListener('click', unlock, { capture: true });
+      window.removeEventListener('keydown', unlock, { capture: true });
       document.removeEventListener('visibilitychange', sync);
     };
   }, [cartSound, soundEnabled, learnOpen]);
@@ -69,6 +75,11 @@ export default function BrachistochroneExperience() {
 
   const departLane = useCallback((lane: number) => {
     setRunning(setLane(lane, true));
+    setRacing(setLane(lane, true));
+  }, []);
+  const finishLane = useCallback((lane: number, time: number) => {
+    setFinishTimes(setLane<number | null>(lane, time));
+    setRacing(setLane(lane, false));
   }, []);
   const readyLane = useCallback((lane: number) => {
     setRunning(current => {
@@ -78,14 +89,20 @@ export default function BrachistochroneExperience() {
     });
   }, []);
   const launch = useCallback(() => {
+    cartSound.unlock();
     if (busy.current) return;
     busy.current = true;
     setGateOpen(true);
     if (window.matchMedia('(max-width: 700px)').matches) setEditorOpen(false);
     gateTimer.current = setTimeout(() => setGateOpen(false), 1100);
-  }, []);
+  }, [cartSound]);
   const ignoreTime = useCallback(() => {}, []);
   const returning = running.some(Boolean);
+  const editCurve = (next: CurvePoint[]) => {
+    if (busy.current) return;
+    setAnchors(next);
+    setFinishTimes(setLane<number | null>(2, null));
+  };
 
   return (
     <main className="game brachistochrone-game">
@@ -146,7 +163,7 @@ export default function BrachistochroneExperience() {
             paused={learnOpen}
             onToggleGate={launch}
             onTick={ignoreTime}
-            onFinish={ignoreTime}
+            onFinish={finishLane}
             onDepart={departLane}
             onReady={readyLane}
           />
@@ -177,9 +194,27 @@ export default function BrachistochroneExperience() {
           <span>Build</span>
         </button>
       </div>
+      <footer className="race-footer" aria-label="Curve descent times">
+        <span className="race-footer-caption">Descent times</span>
+        <ol>
+          {laneNames.map((name, lane) => (
+            <li key={name} className={`race-result race-result-${lane}`}>
+              <span className="race-result-key" aria-hidden="true" />
+              <span className="race-result-name">{name}</span>
+              <output aria-label={`${name} time`} aria-live="polite">
+                {finishTimes[lane] === null ? '—' : finishTimes[lane].toFixed(2)}<small> s</small>
+              </output>
+            </li>
+          ))}
+        </ol>
+        <span className="race-footer-caption" role="status">
+          {racing.some(Boolean) ? 'Racing…' : finishTimes.some(time => time !== null) ? 'Last run' : 'Ready to race'}
+        </span>
+      </footer>
       <BezierEditor
         anchors={anchors}
-        onChange={setAnchors}
+        onChange={editCurve}
+        disabled={returning}
         open={editorOpen}
         onToggle={() => setEditorOpen(false)}
       />

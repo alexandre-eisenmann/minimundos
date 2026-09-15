@@ -3,21 +3,30 @@ import { useCallback, useEffect, useState } from 'react';
 const STORAGE_KEY = 'minimundos.sound-enabled-v2';
 const CHANGE_EVENT = 'minimundos:sound-change';
 
+function needsSoundTap() {
+  return window.matchMedia('(max-width: 850px), (hover: none) and (pointer: coarse)').matches;
+}
+
 function readPreference() {
+  // Each mobile scene starts muted, even when a previous visit saved sound on.
+  if (needsSoundTap()) return false;
   try {
     const stored = window.localStorage.getItem(STORAGE_KEY);
     if (stored !== null) return stored === 'true';
   } catch {
     // Fall through to the device default when storage is unavailable.
   }
-  return !window.matchMedia('(max-width: 850px)').matches;
+  return true;
 }
 
 export function useSoundPreference() {
   const [enabled, setEnabledState] = useState(readPreference);
 
   useEffect(() => {
-    const updateFromStorage = () => setEnabledState(readPreference());
+    const updateFromStorage = () => {
+      // A preference change in another tab must not turn mobile audio on.
+      if (!needsSoundTap()) setEnabledState(readPreference());
+    };
     const updateFromPage = (event: Event) =>
       setEnabledState((event as CustomEvent<boolean>).detail);
     window.addEventListener('storage', updateFromStorage);

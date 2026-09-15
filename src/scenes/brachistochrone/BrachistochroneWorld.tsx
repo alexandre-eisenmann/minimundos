@@ -17,6 +17,7 @@ import {
   afterQueueBoarding,
   haulDistance,
   haulDuration,
+  landingRunout,
   queueWaiting,
   railArcAtX,
   railCartPose,
@@ -139,7 +140,7 @@ function lanePath(points: CurvePoint[]): Station[] {
   const path: Station[] = [{ x: HOLD_X, y: TOP_Y }];
   for (const point of points)
     path.push({ x: START_X + point.x * WIDTH, y: TOP_Y - point.y * DROP });
-  path.push({ x: RUNOUT_X, y: FINISH_Y });
+  path.push(...landingRunout(path[path.length - 2], path[path.length - 1], RUNOUT_X));
   return path;
 }
 
@@ -1354,12 +1355,18 @@ const LandingStage = memo(function LandingStage() {
   const east = RUNOUT_X + 0.7;
   return (
     <group name="landing-stage">
-      <Slab
-        p={[(west + east) / 2, STAGE_Y - 0.08, 0]}
-        s={[east - west, 0.16, 9]}
-        c={timber.deck}
-      />
-      {Array.from({ length: 18 }, (_, i) => (
+      {/* Open rail channels keep the climbing arrival clear of the flat deck. */}
+      {baysBetweenLanes(-4.5, 4.5, 0.55).map(([a, b]) => (
+        <Slab
+          key={a}
+          p={[(west + east) / 2, STAGE_Y - 0.08, (a + b) / 2]}
+          s={[east - west, 0.16, b - a]}
+          c={timber.deck}
+        />
+      ))}
+      {Array.from({ length: 18 }, (_, i) => i)
+        .filter(i => laneZ.every(z => Math.abs(-4.3 + i * 0.507 - z) > 0.61))
+        .map((i) => (
         <Slab
           key={i}
           p={[(west + east) / 2, STAGE_Y + 0.025, -4.3 + i * 0.507]}

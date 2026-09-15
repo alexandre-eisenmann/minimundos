@@ -65,7 +65,7 @@ function cycloidSweep(aspect: number) {
  * The brachistochrone itself: an inverted cycloid, sampled evenly in sweep
  * angle so the near-vertical plunge at the cusp stays well resolved.
  *
- * Whenever the run is more than about 1.86 times the drop the sweep passes π,
+ * Whenever the run is more than π/2 times the drop the sweep passes π,
  * which means the quickest path dips below the finish and climbs back to it.
  * That overshoot is real, so y is deliberately allowed past 1 here.
  */
@@ -102,7 +102,11 @@ export type TimedCurve = {
   duration: number;
 };
 
-/** Ideal frictionless descent under uniform gravity, sampled at segment midpoints. */
+/** Exact travel time along each straight sampled segment, starting at rest.
+ * Energy gives endpoint speeds; constant tangential acceleration gives
+ * dt = 2 ds / (v0 + v1). Midpoint speed undercounts the initial acceleration,
+ * especially for unevenly sampled custom curves, and can create false winners.
+ */
 export function timeCurve(
   points: CurvePoint[],
   width = 10,
@@ -117,8 +121,9 @@ export function timeCurve(
     const dx = (b.x - a.x) * width;
     const dy = (b.y - a.y) * drop;
     const distance = Math.hypot(dx, dy);
-    const midpointDrop = Math.max(0.00001, ((a.y + b.y) * drop) / 2);
-    total += distance / Math.sqrt(2 * gravity * midpointDrop);
+    const startSpeed = Math.sqrt(2 * gravity * Math.max(0, a.y * drop));
+    const endSpeed = Math.sqrt(2 * gravity * Math.max(0, b.y * drop));
+    total += distance === 0 ? 0 : (2 * distance) / (startSpeed + endSpeed);
     elapsed.push(total);
   }
   return { points, elapsed, duration: total };
@@ -138,7 +143,11 @@ export function pointAtTime(curve: TimedCurve, time: number): CurvePoint {
   const t = span ? (time - curve.elapsed[low]) / span : 0;
   const a = curve.points[low];
   const b = curve.points[high];
-  return { x: a.x + (b.x - a.x) * t, y: a.y + (b.y - a.y) * t };
+  // Distance within a segment is quadratic in time under constant acceleration.
+  const va = Math.sqrt(Math.max(0, a.y));
+  const vb = Math.sqrt(Math.max(0, b.y));
+  const fraction = va + vb > 0 ? (2 * va * t + (vb - va) * t * t) / (va + vb) : 0;
+  return { x: a.x + (b.x - a.x) * fraction, y: a.y + (b.y - a.y) * fraction };
 }
 
 export function defaultAnchors(count = 4): CurvePoint[] {

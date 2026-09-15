@@ -40,12 +40,12 @@ test('the cycloid is quicker than every other curve offered', () => {
 
 test('the sampled cycloid matches the closed-form descent time', () => {
   // For a cycloid from the cusp, T = sweep * sqrt(radius / g).
-  const sweep = 3.5095; // run:drop of 2, solved numerically
+  const sweep = 3.5083687685244755; // run:drop of 2, solved numerically
   const radius = 5 / (1 - Math.cos(sweep));
   const exact = sweep * Math.sqrt(radius / 9.81);
   const sampled = timeCurve(sampleCurve('cycloid', [], 480)).duration;
   assert.ok(
-    Math.abs(sampled - exact) < 0.02,
+    Math.abs(sampled - exact) < 0.000002,
     `sampled ${sampled.toFixed(4)} vs exact ${exact.toFixed(4)}`,
   );
 });
@@ -72,4 +72,36 @@ test('the editable default is a straight descent at every control-point count', 
     // The spline samples nonuniformly; midpoint integration differs slightly.
     assert.ok(Math.abs(timeCurve(curve).duration - straight.duration) < 0.02);
   }
+});
+
+test('straight ramp timing includes acceleration from rest at every resolution', () => {
+  const exact = Math.sqrt(2 * 5 / 9.81) * Math.hypot(10, 5) / 5;
+  for (const count of [1, 8, 240, 1000]) {
+    const timed = timeCurve(sampleCurve('line', [], count));
+    assert.ok(Math.abs(timed.duration - exact) < 1e-12);
+    const halfway = pointAtTime(timed, exact / 2);
+    assert.ok(Math.abs(halfway.x - 0.25) < 1e-12);
+    assert.ok(Math.abs(halfway.y - 0.25) < 1e-12);
+  }
+});
+
+test('a steep seven-anchor custom track cannot win through initial-speed integration bias', () => {
+  // The old midpoint-speed rule reported about 1.795 s, beating its 1.798 s cycloid.
+  const anchors = [
+    { x: 0, y: 0 }, { x: 0.0501, y: 0.3266 },
+    { x: 0.175, y: 0.6249 }, { x: 0.3666, y: 0.8705 },
+    { x: 0.52, y: 0.965 }, { x: 0.76, y: 0.965 }, { x: 1, y: 1 },
+  ];
+  for (const count of [90, 240, 960]) {
+    const custom = timeCurve(sampleCurve('custom', anchors, count)).duration;
+    const cycloid = timeCurve(sampleCurve('cycloid', [], count)).duration;
+    assert.ok(custom > cycloid, `custom ${custom} vs cycloid ${cycloid}`);
+    assert.ok(custom > 1.81 && custom < 1.82);
+  }
+});
+
+test('a level start cannot accelerate from rest, and repeated points add no time', () => {
+  assert.equal(timeCurve([{ x: 0, y: 0 }, { x: 0.2, y: 0 }, { x: 1, y: 1 }]).duration, Infinity);
+  const points = sampleCurve('line', []);
+  assert.equal(timeCurve([points[0], ...points]).duration, timeCurve(points).duration);
 });

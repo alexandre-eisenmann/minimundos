@@ -28,6 +28,18 @@ export function haulDistance(time: number, distance: number, speed: number) {
 
 export type RailStation = { x: number; y: number };
 
+/** Untimed runout: match the arrival tangent, then settle onto the level deck. */
+export function landingRunout(before: RailStation, finish: RailStation, endX: number) {
+  const length = Math.min(1.2, endX - finish.x);
+  const slope = (finish.y - before.y) / (finish.x - before.x);
+  const count = Math.ceil((endX - finish.x) / 0.05);
+  return Array.from({ length: count }, (_, i) => {
+    const x = finish.x + (endX - finish.x) * (i + 1) / count;
+    const t = Math.min(1, (x - finish.x) / length);
+    return { x, y: finish.y + slope * length * t * (1 - t) ** 2 };
+  });
+}
+
 /** Locate the physical centre along the monotonically eastward track. */
 export function railArcAtX(line: RailStation[], table: number[], x: number) {
   let low = 0;

@@ -50,3 +50,16 @@ test('cart pitch and position remain continuous through launch and runout joins'
   assert.deepEqual(railCartPose(line, table, 0), { x: -1.5, y: 5, pitch: 0 });
   assert.equal(railArcAtX(line, table, 4), table[3]);
 });
+
+test('the untimed landing blends the arrival slope into the level runout', async () => {
+  const { landingRunout } = await import('./rideMotion.ts');
+  for (const slope of [-0.5, 0, 0.185]) {
+    const finish = { x: 10, y: 1.2 };
+    const runout = landingRunout({ x: 9.99, y: 1.2 - slope * 0.01 }, finish, 13.5);
+    const first = runout[0];
+    assert.ok(Math.abs((first.y - finish.y) / (first.x - finish.x) - slope) < 0.05);
+    assert.deepEqual(runout.at(-1), { x: 13.5, y: 1.2 });
+    for (const point of runout.filter(p => p.x >= 11.2)) assert.equal(point.y, 1.2);
+    for (let i = 1; i < runout.length; i++) assert.ok(runout[i].x > runout[i - 1].x);
+  }
+});
