@@ -19,6 +19,7 @@ import {
   DoorOpen,
   ArrowUp,
   ArrowDown,
+  SlidersHorizontal,
 } from 'lucide-react';
 import { useSoundPreference } from '../../game/sound';
 import { StudioSound } from '../assets/StudioSound';
@@ -112,6 +113,38 @@ export default function MontyHallExperience() {
 
   const [scores, setScores] = useState<Record<number, Score>>({});
   const [scoreboardOpen, setScoreboardOpen] = useState(false);
+  const [compactView, setCompactView] = useState(
+    () => window.matchMedia('(max-width: 850px)').matches,
+  );
+  useEffect(() => {
+    const query = window.matchMedia('(max-width: 850px)');
+    const update = () => setCompactView(query.matches);
+    query.addEventListener('change', update);
+    return () => query.removeEventListener('change', update);
+  }, []);
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const drawer = useRef<HTMLElement>(null),
+    drawerToggle = useRef<HTMLButtonElement>(null);
+  const drawerShown = compactView && drawerOpen;
+  useEffect(() => {
+    if (!compactView) setDrawerOpen(false);
+  }, [compactView]);
+  const wasDrawerShown = useRef(false);
+  useEffect(() => {
+    if (drawerShown) drawer.current?.focus();
+    else if (wasDrawerShown.current) drawerToggle.current?.focus();
+    wasDrawerShown.current = drawerShown;
+    if (!drawerShown) return;
+    const close = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setDrawerOpen(false);
+    };
+    window.addEventListener('keydown', close);
+    return () => window.removeEventListener('keydown', close);
+  }, [drawerShown]);
+  function toggleDrawer() {
+    if (!drawerOpen) setScoreboardOpen(true);
+    setDrawerOpen(!drawerOpen);
+  }
   const [experiments, setExperiments] = useState<Record<number, Experiment>>(
     {},
   );
@@ -454,6 +487,19 @@ export default function MontyHallExperience() {
         </a>
         <div className="topbar-actions">
           <button
+            ref={drawerToggle}
+            className="learn-button monty-drawer-toggle"
+            onClick={toggleDrawer}
+            aria-label={`Studio controls · ${round.count} doors`}
+            aria-expanded={drawerShown}
+            aria-controls="monty-controls"
+          >
+            <SlidersHorizontal size={20} />
+            <b className="monty-drawer-badge" aria-hidden>
+              {round.count}
+            </b>
+          </button>
+          <button
             className="learn-button"
             aria-label={
               soundEnabled ? 'Mute studio sounds' : 'Turn on studio sounds'
@@ -531,32 +577,64 @@ export default function MontyHallExperience() {
         </SceneBoundary>
         <MovementJoystick input={input} disabled={learnOpen} />
       </div>
-      <fieldset
-        className="monty-door-count"
-        disabled={phase === 'revealing' || phase === 'switch'}
+      {compactView && (
+        <button
+          className="monty-drawer-scrim"
+          data-open={drawerShown || undefined}
+          tabIndex={-1}
+          aria-hidden
+          onClick={() => setDrawerOpen(false)}
+        />
+      )}
+      <aside
+        id="monty-controls"
+        ref={drawer}
+        className="monty-controls"
+        data-open={drawerShown || undefined}
+        aria-label="Studio controls"
+        tabIndex={-1}
+        inert={compactView && !drawerOpen}
       >
-        <legend className="monty-door-count-label">Doors</legend>
-        <div className="monty-door-count-options">
-          {doorCounts.map((count) => (
-            <button
-              key={count}
-              type="button"
-              aria-pressed={round.count === count}
-              aria-label={`${count} doors`}
-              onClick={() => count !== round.count && restart(count)}
-            >
-              {count}
-            </button>
-          ))}
-        </div>
-      </fieldset>
-      <Scoreboard
-        scores={scores}
-        counts={doorCounts}
-        current={round.count}
-        open={scoreboardOpen}
-        onToggle={setScoreboardOpen}
-      />
+        <header className="monty-controls-header">
+          <p className="monty-eyebrow">STUDIO CONTROLS</p>
+          <button
+            className="monty-controls-close"
+            onClick={() => setDrawerOpen(false)}
+            aria-label="Close studio controls"
+          >
+            <X size={20} />
+          </button>
+        </header>
+        <fieldset
+          className="monty-door-count"
+          disabled={phase === 'revealing' || phase === 'switch'}
+        >
+          <legend className="monty-door-count-label">Doors</legend>
+          <div className="monty-door-count-options">
+            {doorCounts.map((count) => (
+              <button
+                key={count}
+                type="button"
+                aria-pressed={round.count === count}
+                aria-label={`${count} doors`}
+                onClick={() => {
+                  if (count !== round.count) restart(count);
+                  setDrawerOpen(false);
+                }}
+              >
+                {count}
+              </button>
+            ))}
+          </div>
+        </fieldset>
+        <Scoreboard
+          scores={scores}
+          counts={doorCounts}
+          current={round.count}
+          open={scoreboardOpen}
+          onToggle={setScoreboardOpen}
+        />
+      </aside>
       {phase === 'revealing' && (
         <section className="monty-panel monty-reveal" aria-live="polite">
           <p className="monty-panel-eyebrow">

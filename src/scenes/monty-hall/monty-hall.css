@@ -68,12 +68,31 @@
   outline-offset: 4px;
 }
 
-/* Door count: one balanced segmented control under the top bar actions. */
-.monty-door-count {
+/* Door count and scoreboard stack under the top bar; on compact screens they move into a side drawer. */
+.monty-controls {
   position: absolute;
   z-index: 4;
   top: 84px;
   right: 26px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 10px;
+  max-width: calc(100% - 52px);
+  pointer-events: none;
+}
+.monty-controls > * {
+  pointer-events: auto;
+}
+.monty-controls:focus {
+  outline: none;
+}
+.monty-controls-header,
+.monty-drawer-toggle,
+.monty-drawer-scrim {
+  display: none;
+}
+.monty-door-count {
   display: flex;
   align-items: center;
   gap: 4px;
@@ -132,11 +151,7 @@
 
 /* Played-round scoreboard: a collapsed pill that unfolds into the full table. */
 .monty-scoreboard {
-  position: absolute;
-  z-index: 4;
-  top: 140px;
-  right: 26px;
-  max-width: calc(100% - 52px);
+  max-width: 100%;
   border: 1px solid #8da59a60;
   border-radius: 12px;
   background: #17333df2;
@@ -714,31 +729,121 @@
     font-size: 8px;
     margin-bottom: 7px;
   }
-  .monty-door-count {
-    top: 162px;
-    left: 18px;
-    right: auto;
-    padding-left: 4px;
+  .monty-drawer-toggle {
+    display: inline-flex;
+    position: relative;
   }
-  .monty-door-count-label {
-    display: none;
+  .monty-drawer-badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    min-width: 19px;
+    height: 19px;
+    padding: 0 5px;
+    border-radius: 10px;
+    background: #f3dcae;
+    color: #1d3a3d;
+    font:
+      bold 11px/19px Georgia,
+      serif;
+    font-variant-numeric: tabular-nums;
+    text-align: center;
+    box-shadow: 0 1px 4px #0a1f2380;
   }
-  .monty-scoreboard {
-    top: 210px;
-    left: 18px;
-    right: auto;
-    max-width: calc(100% - 36px);
-    max-height: calc(100dvh - 380px);
-    overflow: auto;
+  .monty-drawer-scrim {
+    display: block;
+    position: absolute;
+    inset: 0;
+    z-index: 6;
+    padding: 0;
+    border: 0;
+    background: #0b1d21;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 260ms;
+  }
+  .monty-drawer-scrim[data-open] {
+    opacity: 0.55;
+    pointer-events: auto;
+  }
+  .monty-controls {
+    position: absolute;
+    z-index: 7;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    align-items: stretch;
+    gap: 14px;
+    width: min(360px, 90vw);
+    max-width: none;
+    padding: max(18px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right))
+      max(18px, env(safe-area-inset-bottom)) 16px;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    border-left: 1px solid #8da59a60;
+    background: linear-gradient(160deg, #1b3a40, #17303a);
+    box-shadow: -18px 0 50px #07181db0;
+    pointer-events: auto;
+    transform: translateX(105%);
+    visibility: hidden;
+    transition:
+      transform 300ms cubic-bezier(0.2, 0.8, 0.2, 1),
+      visibility 0s 300ms;
+  }
+  .monty-controls[data-open] {
+    transform: none;
+    visibility: visible;
+    transition: transform 300ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+  .monty-controls-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .monty-controls-header .monty-eyebrow {
+    margin: 0;
+  }
+  .monty-controls-close {
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    margin-right: -8px;
+    border: 0;
+    border-radius: 10px;
+    background: transparent;
+    color: #efddba;
+  }
+  .monty-controls .monty-door-count {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+    padding: 12px;
+  }
+  .monty-controls .monty-door-count-label {
+    width: 100%;
+    margin: 0;
+    padding-left: 2px;
+  }
+  .monty-controls .monty-door-count-options {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+  }
+  .monty-door-count button {
+    min-width: 0;
+    height: 40px;
+    font-size: 15px;
+  }
+  .monty-controls .monty-scoreboard {
+    box-shadow: none;
+  }
+  .monty-controls .monty-scoreboard table {
+    width: calc(100% - 16px);
+    margin: 0 8px 12px;
   }
   .monty-scoreboard th,
   .monty-scoreboard td {
     padding: 4px 5px;
-  }
-  .monty-door-count button {
-    min-width: 36px;
-    height: 34px;
-    font-size: 14px;
   }
   .monty-game .movement-joystick {
     bottom: 65px;
