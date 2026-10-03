@@ -3,6 +3,7 @@ import {
   useCallback,
   useEffect,
   useLayoutEffect,
+  useMemo,
   useRef,
   useState,
   type ReactNode,
@@ -26,6 +27,8 @@ import TallyMarquee from '../assets/TallyMarquee';
 import MovementJoystick from '../assets/MovementJoystick';
 import type { MovementInput } from '../../game/movement';
 import MontyHallWorld, { type Destination, type Phase } from './MontyHallWorld';
+import { DOOR_APPROACH_Z } from './journey';
+import Scoreboard, { newScore, type Score } from './Scoreboard';
 import {
   canWalk,
   doorPose,
@@ -67,20 +70,6 @@ class SceneBoundary extends Component<
     );
   }
 }
-type Score = {
-  rounds: number;
-  stayPlays: number;
-  stayWins: number;
-  switchPlays: number;
-  switchWins: number;
-};
-const newScore = (): Score => ({
-  rounds: 0,
-  stayPlays: 0,
-  stayWins: 0,
-  switchPlays: 0,
-  switchWins: 0,
-});
 const percent = (value: number) =>
   `${(value * 100).toFixed(1).replace('.0', '')}%`;
 
@@ -116,11 +105,13 @@ export default function MontyHallExperience() {
   }, [round.revealed.length, sound]);
   useEffect(() => {
     if (phase === 'switch') sound.play('ready');
-    if (phase === 'result')
-      sound.play(round.final === round.prize ? 'win' : 'goat');
-  }, [phase, round.final, round.prize, sound]);
+  }, [phase, sound]);
+  /** The final door stays shut until the avatar reaches it; the rest follow. */
+  const [finale, setFinale] = useState<'closed' | 'final' | 'all'>('closed');
+  const liveFinale = useRef(finale);
 
   const [scores, setScores] = useState<Record<number, Score>>({});
+  const [scoreboardOpen, setScoreboardOpen] = useState(false);
   const [experiments, setExperiments] = useState<Record<number, Experiment>>(
     {},
   );
@@ -146,16 +137,35 @@ export default function MontyHallExperience() {
     setPlatformLevel(level);
     setPlatformMoving(moving);
   }, []);
+  useEffect(() => {
+    sound.setLiftMoving(platformMoving && !learnOpen);
+  }, [sound, platformMoving, learnOpen]);
+  const wasMoving = useRef(false);
+  useEffect(() => {
+    if (platformMoving !== wasMoving.current)
+      sound.play(platformMoving ? 'liftStart' : 'liftArrive');
+    wasMoving.current = platformMoving;
+  }, [sound, platformMoving]);
   const score = scores[round.count] ?? newScore();
   const experiment = experiments[round.count] ?? emptyExperiment();
 
   const chances = odds(round.count);
+  const openDoors = useMemo(() => {
+    if (phase === 'tour' || (phase === 'result' && finale === 'all'))
+      return Array.from({ length: round.count }, (_, i) => i);
+    if (phase === 'result' && finale === 'final' && round.final !== null)
+      return [...round.revealed, round.final];
+    return round.revealed;
+  }, [phase, finale, round.count, round.revealed, round.final]);
   const liveRound = useRef(round),
-    livePhase = useRef(phase);
+    livePhase = useRef(phase),
+    liveOpen = useRef(openDoors);
   useLayoutEffect(() => {
     liveRound.current = round;
     livePhase.current = phase;
-  }, [round, phase]);
+    liveOpen.current = openDoors;
+    liveFinale.current = finale;
+  }, [round, phase, openDoors, finale]);
 
   useEffect(() => {
     if (phase !== 'revealing' || learnOpen) return;
@@ -177,7 +187,7 @@ export default function MontyHallExperience() {
     else dialog.current?.close();
   }, [learnOpen]);
   const walkTo = useCallback(
-    (point: FloorPoint & { door?: number }) =>
+    (point: FloorPoint & { door?: number; automatic?: boolean }) =>
       setDestination((current) => ({
         ...point,
         serial: (current?.serial ?? 0) + 1,
@@ -188,15 +198,16 @@ export default function MontyHallExperience() {
     (door: number | null) => setLocation(door),
     [],
   );
+  /** What a tapped door does once the avatar reaches it. */
+  const afterArrival = useRef<{ door: number; action: 'enter' | 'act' } | null>(
+    null,
+  );
   const onDoor = useCallback(
     (door: number) => {
       const current = liveRound.current,
         currentPhase = livePhase.current;
       const pose = doorPose(door, current.count);
-      const opened =
-        currentPhase === 'tour' ||
-        currentPhase === 'result' ||
-        current.revealed.includes(door);
+      const opened = liveOpen.current.includes(door);
       if (currentPhase === 'revealing' && !opened) return;
       if (
         currentPhase === 'switch' &&
@@ -205,12 +216,22 @@ export default function MontyHallExperience() {
         door !== current.alternative
       )
         return;
-      if (pose.level !== avatarLevel.current) {
-        setPendingDoor(null);
+      if (currentPhase === 'result' && !opened && door !== current.final)
+        return;
+      const crossFloor = pose.level !== avatarLevel.current;
+      afterArrival.current = !opened
+        ? { door, action: 'act' }
+        : crossFloor
+          ? { door, action: 'enter' }
+          : null;
+      if (crossFloor) {
+        setPendingDoor(door);
         walkTo({
-          x: liftX(current.count),
-          z: LIFT_Z,
-          level: avatarLevel.current,
+          x: pose.x,
+          z: DOOR_APPROACH_Z,
+          level: pose.level,
+          door,
+          automatic: true,
         });
         return;
       }
@@ -231,11 +252,13 @@ export default function MontyHallExperience() {
   const onWalk = useCallback(
     (point: FloorPoint & { door?: number }) => {
       const current = liveRound.current;
-      const open = ['tour', 'result'].includes(livePhase.current)
-        ? Array.from({ length: current.count }, (_, i) => i)
-        : current.revealed;
       if (
-        canWalk(point, current.count, open, avatarLevel.current * LEVEL_HEIGHT)
+        canWalk(
+          point,
+          current.count,
+          liveOpen.current,
+          avatarLevel.current * LEVEL_HEIGHT,
+        )
       ) {
         setPendingDoor(null);
         if ((point.level ?? 0) !== avatarLevel.current) {
@@ -255,6 +278,8 @@ export default function MontyHallExperience() {
     livePhase.current = 'pick';
     setRound(next);
     setPhase('pick');
+    liveFinale.current = 'closed';
+    setFinale('closed');
     setDestination(null);
     setPlatformCommand(null);
     setResetKey((key) => key + 1);
@@ -274,12 +299,41 @@ export default function MontyHallExperience() {
     liveRound.current = resolved;
     setRound(resolved);
     setPhase('result');
-    setScores((current) => {
-      const previous = current[resolved.count] ?? newScore(),
-        won = resolved.final === resolved.prize ? 1 : 0;
+    liveFinale.current = 'closed';
+    setFinale('closed');
+    const pose = doorPose(resolved.final, resolved.count);
+    setPendingDoor(resolved.final);
+    setDestination({
+      x: pose.x,
+      z: DOOR_APPROACH_Z,
+      level: pose.level,
+      door: resolved.final,
+      automatic: true,
+      serial: Date.now(),
+    });
+  }, []);
+  /** Opening the final door reveals the outcome: sound, score, then confetti. */
+  const openFinal = useCallback(() => {
+    const current = liveRound.current;
+    if (
+      livePhase.current !== 'result' ||
+      liveFinale.current !== 'closed' ||
+      current.final === null
+    )
+      return;
+    liveFinale.current = 'final';
+    setFinale('final');
+    const won = current.final === current.prize ? 1 : 0,
+      switchDoor = current.final === current.alternative;
+    if (won) {
+      sound.play('win');
+      sound.play('applause');
+    } else sound.play('fail');
+    setScores((scores) => {
+      const previous = scores[current.count] ?? newScore();
       return {
-        ...current,
-        [resolved.count]: {
+        ...scores,
+        [current.count]: {
           rounds: previous.rounds + 1,
           stayPlays: previous.stayPlays + Number(!switchDoor),
           stayWins: previous.stayWins + (switchDoor ? 0 : won),
@@ -288,12 +342,22 @@ export default function MontyHallExperience() {
         },
       };
     });
-  }, []);
-  function onArrive(_door: number) {
-    setDestination(null);
-    setPlatformCommand(null);
-    setPendingDoor(null);
-  }
+  }, [sound]);
+  useEffect(() => {
+    if (finale !== 'final' || round.final === null) return;
+    const pose = doorPose(round.final, round.count),
+      door = round.final;
+    // Step inside once the leaves have swung clear, then open the other doors.
+    const enter = setTimeout(() => {
+      setPendingDoor(door);
+      walkTo({ x: pose.x + 0.9, z: -5.65, level: pose.level, door });
+    }, 900);
+    const rest = setTimeout(() => setFinale('all'), 2600);
+    return () => {
+      clearTimeout(enter);
+      clearTimeout(rest);
+    };
+  }, [finale, round.final, round.count, walkTo]);
   const interactDoor = useCallback(
     (door: number) => {
       const current = liveRound.current;
@@ -309,20 +373,34 @@ export default function MontyHallExperience() {
       ) {
         decide(door === current.alternative);
       } else if (
-        ['tour', 'result'].includes(livePhase.current) ||
-        current.revealed.includes(door)
+        livePhase.current === 'result' &&
+        door === current.final &&
+        liveFinale.current === 'closed'
       ) {
+        openFinal();
+      } else if (liveOpen.current.includes(door)) {
         onDoor(door);
       }
     },
-    [decide, onDoor],
+    [decide, onDoor, openFinal],
   );
+  function onArrive(door: number) {
+    const next =
+      afterArrival.current?.door === door ? afterArrival.current : null;
+    afterArrival.current = null;
+    setDestination(null);
+    setPlatformCommand(null);
+    setPendingDoor(null);
+    if (next?.action === 'enter') onDoor(door);
+    else if (next?.action === 'act') interactDoor(door);
+    else if (door === liveRound.current.final) openFinal();
+  }
   useEffect(() => {
     const interact = (event: KeyboardEvent) => {
       if (
         learnOpen ||
         nearDoor === null ||
-        event.code !== 'KeyE' ||
+        (event.code !== 'Space' && event.code !== 'KeyE') ||
         event.repeat ||
         (event.target instanceof Element &&
           event.target.closest('input,select,textarea,button'))
@@ -390,14 +468,15 @@ export default function MontyHallExperience() {
               setSoundEnabled(!soundEnabled);
             }}
           >
-            {soundEnabled ? <Volume2 size={18} /> : <VolumeX size={18} />}
+            {soundEnabled ? <Volume2 size={20} /> : <VolumeX size={20} />}
+            <span>Sound</span>
           </button>
           <button
             className="learn-button"
             onClick={() => setCameraKey((key) => key + 1)}
             aria-label="Reset studio camera"
           >
-            <Camera size={18} />
+            <Camera size={20} />
             <span>View</span>
           </button>
           <button
@@ -405,7 +484,7 @@ export default function MontyHallExperience() {
             onClick={() => setLearnOpen(true)}
             aria-haspopup="dialog"
           >
-            <BookOpen size={18} />
+            <BookOpen size={20} />
             <span>Learn</span>
           </button>
         </div>
@@ -424,6 +503,12 @@ export default function MontyHallExperience() {
       <div className="world">
         <SceneBoundary>
           <MontyHallWorld
+            celebrate={
+              phase === 'result' &&
+              round.final === round.prize &&
+              finale !== 'closed'
+            }
+            open={openDoors}
             soundEnabled={soundEnabled}
             round={round}
             phase={phase}
@@ -446,52 +531,125 @@ export default function MontyHallExperience() {
         </SceneBoundary>
         <MovementJoystick input={input} disabled={learnOpen} />
       </div>
-      <label className="monty-stage-toolbar monty-count-select">
-        <span>Stage size</span>
-        <select
-          aria-label="Number of doors"
-          value={round.count}
-          disabled={phase === 'revealing' || phase === 'switch'}
-          onChange={(event) => restart(Number(event.target.value))}
-        >
+      <fieldset
+        className="monty-door-count"
+        disabled={phase === 'revealing' || phase === 'switch'}
+      >
+        <legend className="monty-door-count-label">Doors</legend>
+        <div className="monty-door-count-options">
           {doorCounts.map((count) => (
-            <option key={count} value={count}>
-              {count} doors
-            </option>
-          ))}
-        </select>
-      </label>
-      {(phase === 'revealing' || phase === 'switch' || phase === 'result') && (
-        <section className="monty-choice-panel" aria-label="Your decision">
-          <p role="status">
-            {phase === 'revealing'
-              ? `You chose door ${round.initial! + 1}. Revealing goats… ${round.revealed.length}/${round.count - 2}`
-              : phase === 'switch'
-                ? `${round.count - 2} ${round.count === 3 ? 'goat revealed' : 'goats revealed'}. Keep your first choice or switch?`
-                : `${won ? 'You won the car!' : 'You found a goat!'} The car is behind door ${round.prize + 1}.`}
-          </p>
-          {phase !== 'result' ? (
-            <div className="monty-decisions">
-              <button
-                disabled={phase !== 'switch'}
-                onClick={() => decide(false)}
-              >
-                Keep door {round.initial! + 1}
-                <small>Your first choice</small>
-              </button>
-              <button
-                disabled={phase !== 'switch'}
-                onClick={() => decide(true)}
-              >
-                Switch to door {round.alternative! + 1}
-                <small>The other closed door</small>
-              </button>
-            </div>
-          ) : (
-            <button className="monty-primary" onClick={() => restart()}>
-              <RotateCcw size={16} /> Play again
+            <button
+              key={count}
+              type="button"
+              aria-pressed={round.count === count}
+              aria-label={`${count} doors`}
+              onClick={() => count !== round.count && restart(count)}
+            >
+              {count}
             </button>
-          )}
+          ))}
+        </div>
+      </fieldset>
+      <Scoreboard
+        scores={scores}
+        counts={doorCounts}
+        current={round.count}
+        open={scoreboardOpen}
+        onToggle={setScoreboardOpen}
+      />
+      {phase === 'revealing' && (
+        <section className="monty-panel monty-reveal" aria-live="polite">
+          <p className="monty-panel-eyebrow">
+            You chose door {round.initial! + 1}
+          </p>
+          <p className="monty-panel-title">The host opens goat doors…</p>
+          <progress
+            className="monty-reveal-progress"
+            aria-label="Goat doors revealed"
+            max={round.count - 2}
+            value={round.revealed.length}
+          />
+          <small>
+            {round.revealed.length} of {round.count - 2}
+          </small>
+        </section>
+      )}
+      {phase === 'switch' && (
+        <section
+          className="monty-panel monty-decision"
+          aria-labelledby="monty-decision-title"
+        >
+          <p className="monty-panel-eyebrow">
+            The host opened {round.count - 2} goat{' '}
+            {round.count === 3 ? 'door' : 'doors'}
+          </p>
+          <h2 id="monty-decision-title" className="monty-panel-title">
+            Keep door {round.initial! + 1}, or switch to door{' '}
+            {round.alternative! + 1}?
+          </h2>
+          <div className="monty-decision-options">
+            <button
+              className="monty-decision-option"
+              onClick={() => decide(false)}
+            >
+              <span className="monty-option-door is-first">
+                {round.initial! + 1}
+              </span>
+              <span>
+                <strong>Keep</strong>
+                <small>Your first choice</small>
+              </span>
+            </button>
+            <button
+              className="monty-decision-option"
+              onClick={() => decide(true)}
+            >
+              <span className="monty-option-door">
+                {round.alternative! + 1}
+              </span>
+              <span>
+                <strong>Switch</strong>
+                <small>The other door</small>
+              </span>
+            </button>
+          </div>
+        </section>
+      )}
+      {phase === 'result' && finale === 'closed' && (
+        <section className="monty-panel monty-reveal" aria-live="polite">
+          <p className="monty-panel-eyebrow">
+            You chose to {round.final === round.alternative ? 'switch' : 'keep'}
+          </p>
+          <p className="monty-panel-title">
+            {pendingDoor !== null
+              ? `Heading to door ${round.final! + 1}…`
+              : `Open door ${round.final! + 1}`}
+          </p>
+          <small>
+            {pendingDoor !== null
+              ? 'The door opens when you arrive.'
+              : 'Walk to it and press Space.'}
+          </small>
+        </section>
+      )}
+      {phase === 'result' && finale !== 'closed' && (
+        <section
+          className={`monty-panel monty-result ${won ? 'is-win' : ''}`}
+          aria-label="Round result"
+        >
+          <output>
+            <span className="monty-panel-title">
+              {won ? 'You won the car!' : 'A goat this time.'}
+            </span>
+            <small>
+              {won
+                ? `The car was behind door ${round.prize + 1}.`
+                : `The car was behind door ${round.prize + 1}. ${round.final === round.alternative ? 'Switching' : 'Keeping'} lost this time.`}
+            </small>
+          </output>
+          <button onClick={() => restart()}>
+            <RotateCcw size={16} /> Play again
+          </button>
         </section>
       )}
       <div className="monty-context" aria-label="Studio interactions">
@@ -505,9 +663,17 @@ export default function MontyHallExperience() {
               <DoorOpen size={28} />
             </span>
             <span>
-              {phase === 'pick' ? 'Choose' : 'Enter'}{' '}
+              {phase === 'pick'
+                ? 'Choose'
+                : phase === 'result' &&
+                    finale === 'closed' &&
+                    nearDoor === round.final
+                  ? 'Open'
+                  : 'Enter'}{' '}
               {nearDoor !== null ? nearDoor + 1 : ''}
-              <small>{nearDoor === null ? 'Walk to a door' : 'Press E'}</small>
+              <small>
+                {nearDoor === null ? 'Walk to a door' : 'Press Space'}
+              </small>
             </span>
           </button>
         )}
@@ -518,6 +684,7 @@ export default function MontyHallExperience() {
               key={direction}
               className="monty-context-action monty-platform-action"
               disabled={
+                pendingDoor !== null ||
                 platformMoving ||
                 platformLevel + direction < 0 ||
                 platformLevel + direction >= doorRows(round.count).length
@@ -549,7 +716,7 @@ export default function MontyHallExperience() {
       </div>
       <footer className="monty-footer">
         <TallyMarquee
-          key={`${phase}-${round.count}-${pendingDoor}-${nearLift}`}
+          key={`${phase}-${finale}-${round.count}-${pendingDoor}-${nearLift}`}
           label="Studio updates"
           description="Round message, movement controls and scores. Swipe or use arrow keys to scroll."
         >
@@ -565,14 +732,16 @@ export default function MontyHallExperience() {
                 : nearLift !== null
                   ? 'The red platform is ready. Go up or down one floor.'
                   : phase === 'pick'
-                    ? 'Walk to a door. Press E or Choose when you arrive.'
+                    ? 'Walk to a door. Press Space or Choose when you arrive.'
                     : phase === 'revealing'
                       ? `The host reveals goats · ${round.revealed.length} / ${round.count - 2}`
                       : phase === 'switch'
-                        ? `Keep door ${round.initial! + 1} or switch to door ${round.alternative! + 1}. Choose below.`
-                        : phase === 'result'
-                          ? `${won ? 'You won the car!' : 'A goat for you!'} Car behind door ${round.prize + 1}. Explore inside.`
-                          : 'Backstage · walk inside any door.'}
+                        ? `Keep door ${round.initial! + 1} or switch to door ${round.alternative! + 1}. Choose Keep or Switch.`
+                        : phase === 'result' && finale === 'closed'
+                          ? `Walk to door ${round.final! + 1} and press Space to open it.`
+                          : phase === 'result'
+                            ? `${won ? 'You won the car!' : 'A goat for you!'} Car behind door ${round.prize + 1}. Explore inside.`
+                            : 'Backstage · walk inside any door.'}
             </span>
           </li>
           <li>

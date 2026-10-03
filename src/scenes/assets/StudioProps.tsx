@@ -1,7 +1,12 @@
 import { useEffect, useMemo, useRef } from 'react';
-import { RoundedBox } from '@react-three/drei';
+import {
+  useStudioBox,
+  useStudioSphere,
+  useStudioMaterial,
+} from './studioResources';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
+import { StudioInstance } from './StudioBatches';
 
 type V = [number, number, number];
 export function StudioBox({
@@ -17,23 +22,18 @@ export function StudioBox({
   radius?: number;
   metal?: number;
 }) {
+  const geometry = useStudioBox(size, radius);
+  const material = useStudioMaterial(color, metal);
   return (
-    <RoundedBox
+    <StudioInstance
       position={position}
-      args={size}
-      radius={Math.min(radius, Math.min(...size) * 0.45)}
-      smoothness={3}
-      castShadow
-      receiveShadow
-    >
-      <meshStandardMaterial
-        color={color}
-        roughness={metal ? 0.32 : 0.72}
-        metalness={metal}
-      />
-    </RoundedBox>
+      size={size}
+      geometry={geometry}
+      material={material}
+    />
   );
 }
+
 export function StudioSign({
   text,
   position,
@@ -55,8 +55,8 @@ export function StudioSign({
 }) {
   const texture = useMemo(() => {
     const canvas = document.createElement('canvas');
-    canvas.width = 1024;
-    canvas.height = Math.round((1024 * height) / width);
+    canvas.width = 512;
+    canvas.height = Math.round((512 * height) / width);
     const context = canvas.getContext('2d')!;
     context.fillStyle = background;
     context.fillRect(0, 0, canvas.width, canvas.height);
@@ -64,7 +64,7 @@ export function StudioSign({
     context.textAlign = 'center';
     context.textBaseline = 'middle';
     context.font = `bold ${(canvas.height * 0.64 * fontSize) / 90}px Trebuchet MS, sans-serif`;
-    context.fillText(text, 512, canvas.height / 2, 980);
+    context.fillText(text, 256, canvas.height / 2, 490);
     const next = new THREE.CanvasTexture(canvas);
     next.colorSpace = THREE.SRGBColorSpace;
     return next;
@@ -77,12 +77,99 @@ export function StudioSign({
     </mesh>
   );
 }
+/**
+ * A numbered disc mounted across the seam of a double door, cut into one half
+ * per leaf so it parts as the doors open. Each half's flat edge sits at x = 0
+ * and extends towards -x (index 0) or +x (index 1); two-digit numbers put one
+ * digit on each half.
+ */
+export function useSplitMedallion(
+  text: string,
+  radius: number,
+  depth: number,
+  color: string,
+  background: string,
+) {
+  const width = radius * 1.12,
+    height = radius * 1.22;
+  const discs = useMemo(
+    () =>
+      [-1, 1].map((side) => {
+        const shape = new THREE.Shape();
+        shape.moveTo(0, -radius);
+        shape.absarc(0, 0, radius, -Math.PI / 2, Math.PI / 2, side < 0);
+        shape.lineTo(0, -radius);
+        return new THREE.ExtrudeGeometry(shape, {
+          depth,
+          bevelEnabled: false,
+          curveSegments: 24,
+        });
+      }),
+    [radius, depth],
+  );
+  const material = useMemo(() => {
+    const canvas = document.createElement('canvas');
+    canvas.width = 256;
+    canvas.height = Math.round((256 * height) / width);
+    const context = canvas.getContext('2d')!;
+    const mid = canvas.width / 2,
+      gap = canvas.width * 0.04,
+      y = canvas.height * 0.54;
+    context.fillStyle = background;
+    context.fillRect(0, 0, canvas.width, canvas.height);
+    context.fillStyle = color;
+    context.textBaseline = 'middle';
+    context.font = `900 ${canvas.height * 0.88}px Trebuchet MS, sans-serif`;
+    if (text.length === 2) {
+      context.textAlign = 'right';
+      context.fillText(text[0], mid - gap, y, mid - gap * 2);
+      context.textAlign = 'left';
+      context.fillText(text[1], mid + gap, y, mid - gap * 2);
+    } else {
+      context.textAlign = 'center';
+      context.fillText(text, mid, y, canvas.width - gap * 2);
+    }
+    const map = new THREE.CanvasTexture(canvas);
+    map.colorSpace = THREE.SRGBColorSpace;
+    return new THREE.MeshBasicMaterial({ map, toneMapped: false });
+  }, [text, width, height, color, background]);
+  const numerals = useMemo(
+    () =>
+      [0, 1].map((half) => {
+        const geometry = new THREE.PlaneGeometry(width / 2, height);
+        geometry.translate(((half ? 1 : -1) * width) / 4, 0, depth + 0.004);
+        const uv = geometry.attributes.uv;
+        for (let i = 0; i < uv.count; i++)
+          uv.setX(i, (uv.getX(i) + half) / 2);
+        return geometry;
+      }),
+    [width, height, depth],
+  );
+  useEffect(
+    () => () => {
+      material.map?.dispose();
+      material.dispose();
+    },
+    [material],
+  );
+  useEffect(
+    () => () => [...discs, ...numerals].forEach((g) => g.dispose()),
+    [discs, numerals],
+  );
+  return { discs, numerals, numeralMaterial: material };
+}
 function Form({ p, s, c, r = [0, 0, 0] }: { p: V; s: V; c: string; r?: V }) {
+  const geometry = useStudioSphere();
+  const material = useStudioMaterial(c);
   return (
-    <mesh position={p} scale={s} rotation={r} castShadow receiveShadow>
-      <sphereGeometry args={[1, 24, 16]} />
-      <meshStandardMaterial color={c} roughness={0.85} />
-    </mesh>
+    <StudioInstance
+      position={p}
+      scale={s}
+      rotation={r}
+      size={[2, 2, 2]}
+      geometry={geometry}
+      material={material}
+    />
   );
 }
 /** Soft continuous silhouette, curved horns and hooves; reusable studio prize. */
@@ -289,7 +376,7 @@ export function TelevisionCamera() {
           side={THREE.DoubleSide}
         />
       </mesh>
-      <mesh position={[0, 0.94, 0]}>
+      <mesh position={[0, 0.94, 0]} castShadow>
         <cylinderGeometry args={[0.055, 0.075, 1.3, 16]} />
         <meshStandardMaterial color="#b5baab" metalness={0.7} roughness={0.3} />
       </mesh>
@@ -300,7 +387,11 @@ export function TelevisionCamera() {
             size={[0.09, 0.07, 0.68]}
             color="#61706a"
           />
-          <mesh position={[0, 0.13, 0.6]} rotation={[0, 0, Math.PI / 2]}>
+          <mesh
+            position={[0, 0.13, 0.6]}
+            rotation={[0, 0, Math.PI / 2]}
+            castShadow
+          >
             <cylinderGeometry args={[0.1, 0.1, 0.09, 16]} />
             <meshStandardMaterial color="#283435" />
           </mesh>
