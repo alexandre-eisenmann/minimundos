@@ -40,5 +40,26 @@
       "image": "/brachistochrone-atlas.png",
       "imageAlt": "The playable miniature workshop with curved racing tracks, a waterwheel, and a wooded landscape."
     }
+  },
+  {
+    "slug": "monty-hall",
+    "path": "/scenes/monty-hall",
+    "title": "The Monty Hall problem",
+    "learningObjective": "Discover why switching wins more often when a knowledgeable host reveals the goats.",
+    "social": {
+      "title": "MiniMundos · The Monty Hall Problem",
+      "description": "Enter a 1975 television studio. Choose a door, meet the goats, and discover why switching changes your chances.",
+      "image": "/monty-hall-atlas.jpg",
+      "imageAlt": "An original miniature 1970s television studio with three prize doors, a host, cameras and a costumed audience."
+    },
+    "atlas": {
+      "title": "The door you didn’t choose.",
+      "place": "Hollywood, California",
+      "subjects": ["Mathematics", "Probability", "History"],
+      "question": "Would you keep your door, or switch?",
+      "description": "You’re on the air in an imagined 1975 studio. Pick a door, let the host reveal the goats, and test your intuition. Then go backstage, pull the lever, and ride a lift through a right-triangle studio of up to 55 doors.",
+      "image": "/monty-hall-atlas.jpg",
+      "imageAlt": "The playable miniature Monty Hall studio: colourful closed doors, warm marquee bulbs, television cameras and a costumed audience."
+    }
   }
 ]

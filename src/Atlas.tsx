@@ -223,9 +223,9 @@ export default function Atlas() {
         </div>
         <div className="idea-copy">
           <p>
-            A city becomes a puzzle. A workshop becomes an experiment. Each
-            minimundo captures a place and a moment, then invites you to ask:{' '}
-            <em>what if?</em>
+            A city becomes a puzzle. A workshop becomes an experiment. A game
+            show becomes a surprising lesson in chance. Each minimundo captures
+            a place and a moment, then invites you to ask: <em>what if?</em>
           </p>
           <p>
             Made for curious minds, independent adventures, and discoveries

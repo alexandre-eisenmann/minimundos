@@ -9,11 +9,19 @@ export function SceneCamera({
   target = [0, 0, 0],
   position = [20, 24, -27],
   desktopWidth = 31,
+  compactWidth = 30,
+  portraitWidth = 22,
+  verticalSpan = 21,
+  minimumZoom = 8,
 }: {
   resetKey?: number;
   target?: [number, number, number];
   position?: [number, number, number];
   desktopWidth?: number;
+  compactWidth?: number;
+  portraitWidth?: number;
+  verticalSpan?: number;
+  minimumZoom?: number;
 }) {
   const { camera, gl, size } = useThree();
   const controls = useRef<OrbitControls | null>(null);
@@ -27,7 +35,7 @@ export function SceneCamera({
     next.enablePan = true;
     next.minPolarAngle = 0.32;
     next.maxPolarAngle = 1.25;
-    next.minZoom = 8;
+    next.minZoom = minimumZoom;
     next.maxZoom = 65;
     next.zoomSpeed = 1.2;
     next.rotateSpeed = 0.6;
@@ -37,7 +45,7 @@ export function SceneCamera({
       next.dispose();
       controls.current = null;
     };
-  }, [camera, gl, targetX, targetY, targetZ]);
+  }, [camera, gl, targetX, targetY, targetZ, minimumZoom]);
 
   useEffect(() => {
     const compact = window.matchMedia('(max-width: 850px)').matches;
@@ -45,11 +53,12 @@ export function SceneCamera({
     camera.position.set(positionX, positionY, positionZ);
     const orthographic = camera as THREE.OrthographicCamera;
     orthographic.zoom = Math.max(
-      8,
+      minimumZoom,
       Math.min(
         36,
-        size.width / (portrait ? 22 : compact ? 30 : desktopWidth),
-        size.height / 21,
+        size.width /
+          (portrait ? portraitWidth : compact ? compactWidth : desktopWidth),
+        size.height / verticalSpan,
       ),
     );
     orthographic.updateProjectionMatrix();
@@ -58,6 +67,10 @@ export function SceneCamera({
   }, [
     camera,
     desktopWidth,
+    compactWidth,
+    portraitWidth,
+    verticalSpan,
+    minimumZoom,
     positionX,
     positionY,
     positionZ,

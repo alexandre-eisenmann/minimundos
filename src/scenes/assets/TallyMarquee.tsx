@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { Pause, Play } from 'lucide-react';
 
 /** Scroll a duplicate visual copy so the end joins the beginning without a jump. */
-export default function TallyMarquee({ children }: { children: ReactNode }) {
+export default function TallyMarquee({ children, label = "Bridge crossing tallies", description = "Bridge numbers, names and tally marks. Swipe or use arrow keys to scroll." }: { children: ReactNode; label?: string; description?: string }) {
   const viewport = useRef<HTMLDivElement>(null);
   const original = useRef<HTMLOListElement>(null);
   const cycle = useRef(0);
@@ -67,9 +67,9 @@ export default function TallyMarquee({ children }: { children: ReactNode }) {
     };
   }, []);
 
-  return <aside className="bridge-tallies" aria-label="Bridge crossing tallies">
+  return <aside className="bridge-tallies" aria-label={label}>
     <div className="tally-viewport" ref={viewport} tabIndex={overflow ? 0 : -1}
-      aria-label="Bridge numbers, names and tally marks. Swipe or use arrow keys to scroll."
+      aria-label={description}
       onKeyDown={(event) => event.stopPropagation()}
       onFocus={() => { focused.current = true; }} onBlur={() => { focused.current = false; }}
       onPointerEnter={(event) => { if (event.pointerType === 'mouse') hovering.current = true; }}

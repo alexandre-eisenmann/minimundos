@@ -1,0 +1,1280 @@
+.game.monty-game {
+  background: #20383b;
+  color: #f8e7c7;
+  font-family: 'Trebuchet MS', Arial, sans-serif;
+}
+.monty-game .topbar {
+  z-index: 4;
+  right: 24px;
+  justify-content: space-between;
+}
+.monty-game .scene-title {
+  z-index: 2;
+  top: 99px;
+  max-width: 320px;
+}
+.monty-game .scene-title h1 {
+  font-size: clamp(30px, 3.4vw, 46px);
+  color: #ffe4ad;
+  line-height: 1.08;
+}
+.monty-game .scene-title p {
+  color: #d6ddd2;
+  font-size: 13px;
+  line-height: 1.65;
+}
+.monty-game .scene-title .monty-eyebrow,
+.monty-eyebrow {
+  font-size: 10px;
+  letter-spacing: 2.4px;
+  color: #d8b57e;
+  margin-bottom: 12px;
+}
+.monty-game button {
+  cursor: pointer;
+}
+.monty-game button:focus-visible,
+.monty-game select:focus-visible {
+  outline: 2px solid #f5d497;
+  outline-offset: 4px;
+}
+.monty-game .learn-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  pointer-events: auto;
+  border: 1px solid #eeddb738;
+  border-radius: 12px;
+  background: #20383b90;
+  padding: 12px 15px;
+  font-size: 12px;
+}
+.monty-format {
+  position: absolute;
+  top: 94px;
+  right: 25px;
+  z-index: 3;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 10px 12px;
+  width: 202px;
+  padding: 15px;
+  border-radius: 13px;
+  border: 1px solid #f2ddaa24;
+  background: #213b3be8;
+  box-shadow: 0 8px 30px #11252320;
+}
+.monty-format > span {
+  grid-column: 1 / -1;
+  font-size: 9px;
+  letter-spacing: 2px;
+  color: #d4b682;
+}
+.monty-format label {
+  font-size: 12px;
+  color: #d8ded3;
+}
+.monty-format select {
+  color: #f7e4bd;
+  background: #304b48;
+  border: 1px solid #e8d3a64a;
+  border-radius: 7px;
+  padding: 7px 4px;
+  min-width: 0;
+  font-size: 12px;
+}
+.monty-format > button {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 0;
+  background: #38564f;
+  padding: 9px;
+  border-radius: 7px;
+  font-size: 12px;
+}
+.monty-format small {
+  grid-column: 1 / -1;
+  font-size: 10px;
+  line-height: 1.5;
+  color: #b6c5bc;
+}
+.monty-visit-menu {
+  grid-column: 1 / -1;
+  display: grid;
+  gap: 4px;
+  max-height: 240px;
+  overflow-y: auto;
+}
+.monty-visit-menu button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px;
+  font-size: 12px;
+  background: #2b4642;
+  border: 1px solid #9baf9f30;
+  border-radius: 5px;
+}
+.monty-host {
+  position: absolute;
+  bottom: 64px;
+  left: 27px;
+  z-index: 3;
+  width: 335px;
+  background: #f5e7ccf5;
+  color: #304742;
+  border: 1px solid #ffefce;
+  border-radius: 15px;
+  box-shadow: 0 10px 35px #11252325;
+  padding: 19px 20px 16px;
+}
+.monty-host-heading {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 15px;
+  font-size: 9px;
+  letter-spacing: 1.2px;
+  color: #8c593b;
+}
+.monty-host-heading > span:last-child {
+  margin-left: auto;
+  color: #927e61;
+  letter-spacing: 1px;
+}
+.monty-air-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #bd5338;
+}
+.monty-dialogue h2 {
+  font:
+    normal 23px/1.2 Georgia,
+    serif;
+  letter-spacing: -0.6px;
+  margin: 0 0 9px;
+  color: #304742;
+}
+.monty-dialogue p {
+  font-size: 12px;
+  line-height: 1.65;
+  margin: 0 0 14px;
+  color: #586357;
+}
+.monty-dialogue small {
+  display: block;
+  font-size: 11px;
+  color: #7f765f;
+  margin: 6px 0;
+}
+.monty-door-choices {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.monty-game .monty-door-choices button {
+  width: 42px;
+  height: 40px;
+  border: 1px solid #bdad8a;
+  border-radius: 8px;
+  background: #ede0c2;
+  color: #34564b;
+  font:
+    bold 17px Georgia,
+    serif;
+}
+.monty-game .monty-door-choices button:hover {
+  background: #d9c698;
+}
+.monty-decisions {
+  display: flex;
+  gap: 7px;
+}
+.monty-game .monty-decisions button,
+.monty-game .monty-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 41px;
+  border: 1px solid #a2aa8f;
+  border-radius: 8px;
+  padding: 9px 12px;
+  color: #385548;
+  background: transparent;
+  font-size: 12px;
+}
+.monty-game .monty-primary,
+.monty-game .monty-decisions .monty-primary {
+  background: #356352;
+  color: #fff0cf;
+  border-color: #356352;
+}
+.monty-game .monty-primary:hover {
+  background: #284d41;
+}
+.monty-game .monty-decisions button:hover {
+  background: #d9c698;
+}
+.monty-game .monty-decisions .monty-primary:hover {
+  background: #284d41;
+}
+.monty-game .monty-odds-toggle {
+  border: 0;
+  background: none;
+  color: #78674c;
+  padding: 12px 0 0;
+  font-size: 11px;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.monty-game .monty-odds-toggle:hover {
+  background: none;
+  color: #304742;
+}
+.monty-odds {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 9px;
+  margin-top: 12px;
+  font-size: 11px;
+}
+.monty-odds span {
+  background: #e7d7b5;
+  padding: 9px;
+  border-radius: 6px;
+}
+.monty-odds b {
+  display: block;
+  font-size: 22px;
+  margin-top: 3px;
+  color: #356352;
+}
+.monty-odds p {
+  grid-column: 1 / -1;
+  font-size: 11px;
+  line-height: 1.5;
+  margin: 0;
+}
+.monty-reveal-progress {
+  height: 4px;
+  background: #d9caad;
+  border-radius: 5px;
+  overflow: hidden;
+}
+.monty-reveal-progress span {
+  display: block;
+  height: 100%;
+  background: #ae6d42;
+  transition: width 0.4s;
+}
+.monty-game .movement-joystick {
+  bottom: 85px;
+  z-index: 3;
+}
+.monty-footer {
+  position: absolute;
+  z-index: 3;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  min-height: 38px;
+  padding: 10px 26px;
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  border-top: 1px solid #e4d7b32b;
+  background: #20383be8;
+  font-size: 10px;
+  color: #c9d3c8;
+}
+.monty-learn {
+  width: min(660px, calc(100vw - 32px));
+  max-height: calc(100dvh - 50px);
+  overflow: auto;
+  border: 1px solid #d4b98c;
+  border-radius: 20px;
+  background: #f5ead4;
+  color: #304742;
+  padding: 35px;
+  box-shadow: 0 20px 90px #0b222a66;
+}
+.monty-learn::backdrop {
+  background: #122a2eb0;
+  backdrop-filter: blur(5px);
+}
+.monty-learn h2 {
+  font:
+    normal 34px/1.2 Georgia,
+    serif;
+  margin: 0 0 20px;
+  color: #304742;
+}
+.monty-learn h3 {
+  color: #304742;
+  font:
+    normal 24px Georgia,
+    serif;
+  margin: 24px 0 12px;
+}
+.monty-learn p {
+  color: #526156;
+  font-size: 14px;
+  line-height: 1.75;
+}
+.monty-game .monty-close {
+  position: absolute;
+  top: 17px;
+  right: 17px;
+  border: 0;
+  background: transparent;
+  color: #304742;
+  padding: 5px;
+}
+.monty-probability-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 10px;
+  font-size: 12px;
+  margin: 19px 0;
+}
+.monty-probability-row > div {
+  grid-column: 1 / -1;
+  height: 12px;
+  background: #ded0ad;
+  border-radius: 8px;
+  overflow: hidden;
+}
+.monty-probability-row i {
+  display: block;
+  height: 100%;
+  background: #b76843;
+}
+.monty-probability-row.switch i {
+  background: #3d7e68;
+}
+.monty-learn .monty-assumptions {
+  border-left: 3px solid #bfa980;
+  padding-left: 13px;
+  font-size: 11px;
+  color: #6e745f;
+}
+.monty-experiment {
+  border-top: 1px solid #c6b995;
+  border-bottom: 1px solid #c6b995;
+  margin: 26px 0;
+  padding-bottom: 23px;
+}
+.monty-experiment-results {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  margin-top: 19px;
+  gap: 12px;
+}
+.monty-experiment-results span {
+  font-size: 11px;
+  color: #65705d;
+}
+.monty-experiment-results strong {
+  display: block;
+  color: #356352;
+  font-size: 26px;
+  margin-bottom: 5px;
+}
+.monty-experiment small {
+  display: block;
+  font-size: 11px;
+  color: #6e745f;
+  margin-top: 15px;
+}
+.monty-history a {
+  display: block;
+  font-size: 12px;
+  color: #8b5638;
+  text-underline-offset: 3px;
+  margin-top: 11px;
+}
+@media (max-width: 850px) {
+  .game.monty-game {
+    display: block;
+    height: 100svh;
+    min-height: 640px;
+    padding: 0;
+    overflow: hidden;
+  }
+  .monty-game .world {
+    position: absolute;
+    inset: 0;
+    margin: 0;
+    height: 100%;
+    width: 100%;
+  }
+  .monty-game .topbar {
+    position: absolute;
+    top: 17px;
+    left: 17px;
+    right: 17px;
+    width: auto;
+  }
+  .monty-game .topbar::before {
+    display: none;
+  }
+  .monty-game .brand {
+    font-size: 22px;
+  }
+  .monty-game .scene-title {
+    position: absolute;
+    top: 77px;
+    left: 18px;
+    margin: 0;
+    width: auto;
+  }
+  .monty-game .scene-title h1 {
+    font-size: 31px;
+  }
+  .monty-game .scene-title p {
+    font-size: 11px;
+  }
+  .monty-game .scene-title .monty-eyebrow {
+    font-size: 8px;
+    margin-bottom: 6px;
+  }
+  .monty-format {
+    top: 80px;
+    right: 17px;
+    width: 157px;
+    padding: 10px;
+    gap: 8px;
+  }
+  .monty-format small {
+    font-size: 8px;
+  }
+  .monty-format > span {
+    font-size: 8px;
+  }
+  .monty-host {
+    left: 17px;
+    bottom: 48px;
+    width: 306px;
+    padding: 14px 16px;
+  }
+  .monty-game .movement-joystick {
+    right: 18px;
+    bottom: 62px;
+  }
+  .monty-footer {
+    padding: 9px 17px;
+    min-height: 33px;
+    font-size: 9px;
+  }
+}
+@media (max-width: 560px) {
+  .game.monty-game {
+    min-height: 720px;
+  }
+  .monty-game .scene-title h1 {
+    font-size: 27px;
+  }
+  .monty-game .scene-title {
+    max-width: 205px;
+  }
+  .monty-format {
+    width: 133px;
+    padding: 8px;
+  }
+  .monty-format label {
+    display: none;
+  }
+  .monty-format select {
+    grid-column: 1 / -1;
+    width: 100%;
+  }
+  .monty-format > button {
+    font-size: 10px;
+    padding: 7px 4px;
+    gap: 4px;
+  }
+  .monty-host {
+    bottom: 47px;
+    width: calc(100% - 34px);
+    max-height: 280px;
+    overflow: auto;
+  }
+  .monty-host-heading {
+    margin-bottom: 9px;
+  }
+  .monty-dialogue h2 {
+    font-size: 21px;
+  }
+  .monty-dialogue p {
+    margin-bottom: 10px;
+    font-size: 11px;
+  }
+  .monty-game .movement-joystick {
+    bottom: 300px;
+    right: 13px;
+  }
+  .monty-game .joystick-surface {
+    width: 72px;
+    height: 72px;
+  }
+  .monty-footer {
+    flex-direction: column;
+    gap: 3px;
+    font-size: 8px;
+    padding: 8px 17px;
+  }
+  .monty-learn {
+    padding: 25px 20px;
+  }
+  .monty-learn h2 {
+    font-size: 29px;
+  }
+}
+@media (max-height: 600px) and (min-width: 700px) {
+  .game.monty-game {
+    min-height: 440px;
+  }
+  .monty-game .scene-title {
+    top: 76px;
+  }
+  .monty-game .scene-title h1 {
+    font-size: 28px;
+  }
+  .monty-host {
+    bottom: 45px;
+    width: 310px;
+    padding: 12px 15px;
+    max-height: 220px;
+    overflow: auto;
+  }
+  .monty-format {
+    top: 75px;
+  }
+}
+
+.monty-game[data-capture='atlas'] > :not(.world),
+.monty-game[data-capture='atlas'] .movement-joystick {
+  display: none;
+}
+.monty-game .monty-host button:hover:not(:disabled):not(.monty-primary) {
+  background: #dfcda7;
+}
+.monty-game .monty-host .monty-odds-toggle:hover:not(:disabled) {
+  background: none;
+  color: #304742;
+}
+.monty-game .monty-learn .monty-close:hover:not(:disabled) {
+  background: #e1d3b7;
+}
+
+/* Scene controls stay in one small toolbar; the stage lever is the primary way to expand. */
+.monty-stage-toolbar {
+  position: absolute;
+  z-index: 5;
+  right: 25px;
+  top: 91px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.monty-stage-toolbar select,
+.monty-stage-toolbar button,
+.monty-stage-toolbar summary {
+  color: #f3dfb8;
+  background: #264441e8;
+  border: 1px solid #bdbd9d48;
+  border-radius: 8px;
+  font-size: 11px;
+  padding: 9px;
+  cursor: pointer;
+}
+.monty-stage-toolbar button {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.monty-accessible-walk {
+  position: relative;
+}
+.monty-accessible-walk > div {
+  position: absolute;
+  right: 0;
+  top: 43px;
+  width: 215px;
+  padding: 13px;
+  display: grid;
+  gap: 8px;
+  background: #203b3bf5;
+  border: 1px solid #bdbd9d48;
+  border-radius: 12px;
+}
+.monty-accessible-walk label {
+  font-size: 10px;
+  color: #d1c4a6;
+}
+.monty-walking {
+  display: block;
+  font-size: 11px;
+  color: #806748;
+  padding: 8px 0;
+  border-top: 1px solid #c5b792;
+  margin: 3px 0 0;
+}
+.monty-game .scene-title {
+  max-width: 290px;
+}
+@media (max-width: 850px) {
+  .monty-stage-toolbar {
+    right: 17px;
+    top: 79px;
+  }
+}
+@media (max-width: 560px) {
+  .monty-stage-toolbar {
+    top: 202px;
+    left: 17px;
+    right: auto;
+  }
+  .monty-game .scene-title {
+    max-width: 230px;
+  }
+  .monty-accessible-walk > div {
+    right: 0;
+  }
+  .monty-game .movement-joystick {
+    bottom: 270px;
+  }
+}
+
+/* Nearby actions use the same tactile, round controls as the racing workshop. */
+.monty-context {
+  position: absolute;
+  z-index: 6;
+  left: 28px;
+  bottom: 100px;
+  display: flex;
+  align-items: flex-end;
+  gap: 18px;
+}
+.monty-context-action {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 9px;
+  color: #f4dfb4;
+  background: none;
+  border: 0;
+  padding: 0;
+  font-size: 12px;
+  cursor: pointer;
+}
+.monty-context-icon {
+  display: grid;
+  place-items: center;
+  width: 66px;
+  height: 66px;
+  border-radius: 50%;
+  background: #335d58;
+  border: 1px solid #e8d4a469;
+  box-shadow:
+    0 5px 18px #12272566,
+    inset 0 2px 0 #ffffff15;
+}
+.monty-context-action:hover:not(:disabled) .monty-context-icon {
+  background: #43736a;
+}
+.monty-context-action:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+.monty-context-action small {
+  display: block;
+  font-size: 9px;
+  opacity: 0.7;
+  margin-top: 3px;
+}
+.monty-lift-action {
+  display: grid;
+  gap: 8px;
+  justify-items: center;
+}
+.monty-lift-action label {
+  color: #ead5ad;
+  font-size: 11px;
+}
+.monty-lift-action select {
+  color: #f4dfb4;
+  background: #284641;
+  border: 1px solid #e8d4a469;
+  border-radius: 7px;
+  padding: 6px;
+}
+.monty-cue {
+  position: absolute;
+  bottom: 45px;
+  left: 28px;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  color: #f2dfb9;
+  background: #213d3ce8;
+  border: 1px solid #c8c2a12b;
+  border-radius: 24px;
+  padding: 11px 17px;
+  font-size: 12px;
+  max-width: calc(100% - 190px);
+}
+.monty-cue .monty-air-dot {
+  flex: 0 0 5px;
+}
+@media (max-width: 560px) {
+  .monty-context {
+    left: 17px;
+    bottom: 125px;
+  }
+  .monty-cue {
+    left: 17px;
+    bottom: 55px;
+    max-width: calc(100% - 34px);
+    font-size: 11px;
+  }
+  .monty-game .movement-joystick {
+    bottom: 135px;
+  }
+}
+
+/* A stable control dock: icons and both label lines share the same baseline. */
+.monty-context {
+  bottom: 76px;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 15px 16px 12px;
+  border: 1px solid #b7c7b72b;
+  border-radius: 20px;
+  background: #20383be8;
+  box-shadow: 0 12px 35px #102b3030;
+}
+.monty-context-action {
+  width: 88px;
+  min-height: 108px;
+}
+.monty-context-action > span:last-child {
+  min-height: 32px;
+  line-height: 1.35;
+}
+.monty-context-action:disabled {
+  opacity: 0.58;
+}
+.monty-lift-action {
+  position: relative;
+  display: block;
+}
+.monty-lift-action > label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+.monty-lift-action > select {
+  position: absolute;
+  bottom: calc(100% + 24px);
+  left: 0;
+  width: 88px;
+  font-size: 11px;
+}
+.monty-game .movement-joystick {
+  bottom: 83px;
+}
+.monty-footer {
+  padding: 0;
+  height: 48px;
+  min-height: 48px;
+  display: block;
+}
+.monty-footer .bridge-tallies {
+  position: static;
+  display: flex;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+}
+.monty-footer .tally-viewport {
+  flex: 1;
+  min-width: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.monty-footer .tally-viewport::-webkit-scrollbar {
+  display: none;
+}
+.monty-footer .tally-track {
+  display: flex;
+  width: max-content;
+  min-width: 100%;
+  height: 100%;
+}
+.monty-footer ol {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  gap: 36px;
+  margin: 0;
+  padding: 0 28px;
+  list-style: none;
+}
+.monty-footer li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  white-space: nowrap;
+  font-size: 12px;
+}
+.monty-footer .monty-footer-message {
+  color: #ffe4ad;
+}
+.monty-footer .tally-pause {
+  flex: 0 0 40px;
+  border: 0;
+  border-left: 1px solid #e4d7b32b;
+  background: #20383b;
+  color: #ffe4ad;
+}
+@media (max-width: 560px) {
+  .game.monty-game {
+    height: 100dvh;
+    min-height: 420px;
+  }
+  .monty-context {
+    left: 12px;
+    bottom: 66px;
+    gap: 3px;
+    padding: 10px 5px 7px;
+    border-radius: 15px;
+  }
+  .monty-context-action {
+    width: 70px;
+    min-height: 92px;
+    font-size: 10px;
+    gap: 7px;
+  }
+  .monty-context-icon {
+    width: 52px;
+    height: 52px;
+  }
+  .monty-context-action small {
+    font-size: 8px;
+  }
+  .monty-lift-action > select {
+    width: 70px;
+    bottom: calc(100% + 18px);
+    font-size: 10px;
+  }
+  .monty-game .movement-joystick {
+    right: 12px;
+    bottom: 84px;
+  }
+  .monty-footer li {
+    font-size: 11px;
+  }
+}
+.monty-game .monty-footer ol {
+  min-width: 0;
+  gap: 24px;
+  padding: 0 22px;
+}
+.monty-game .monty-footer li {
+  flex: 0 0 auto;
+  padding: 0;
+  border: 0;
+}
+/* Reserve space for the title and controller dock in compact windows. */
+@media (min-width: 561px) and (max-width: 850px) {
+  .monty-game .world {
+    top: 130px;
+    bottom: 155px;
+    height: calc(100% - 285px);
+    overflow: visible;
+  }
+  .monty-game .movement-joystick {
+    bottom: -72px;
+  }
+  .monty-game .scene-title h1 {
+    font-size: 27px;
+  }
+}
+@media (max-width: 560px) {
+  .monty-game .world {
+    top: 230px;
+    bottom: 175px;
+    height: calc(100% - 405px);
+    min-height: 120px;
+    overflow: visible;
+  }
+  .monty-game .movement-joystick {
+    bottom: -91px;
+  }
+}
+@media (min-width: 851px) {
+  .monty-game .world {
+    left: 260px;
+    top: 95px;
+    width: calc(100% - 275px);
+    height: calc(100% - 185px);
+    overflow: visible;
+  }
+  .monty-game .movement-joystick {
+    bottom: -7px;
+    right: 13px;
+  }
+  .monty-game .scene-title {
+    max-width: 240px;
+  }
+  .monty-game .scene-title h1 {
+    font-size: clamp(30px, 3vw, 42px);
+  }
+}
+@media (max-width: 360px) {
+  .monty-context-action {
+    width: 60px;
+  }
+  .monty-context-action small {
+    max-width: 60px;
+  }
+  .monty-lift-action > select {
+    width: 60px;
+  }
+  .monty-game .joystick-surface {
+    width: 64px;
+    height: 64px;
+  }
+}
+/* Native selects are replaced by an explicit, compact door-count switcher. */
+.monty-door-counts {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  padding: 4px;
+  background: #193330;
+  border: 1px solid #bdbd9d48;
+  border-radius: 10px;
+}
+.monty-door-counts > span {
+  padding: 0 7px;
+  font-size: 11px;
+  color: #d4bd91;
+}
+.monty-door-counts button {
+  min-width: 30px;
+  justify-content: center;
+  border: 0;
+  background: transparent;
+}
+.monty-door-counts button[aria-pressed='true'] {
+  background: #e8ce95;
+  color: #203b36;
+  box-shadow: 0 2px 6px #10282250;
+}
+.monty-stage-toolbar {
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  max-width: calc(100% - 34px);
+}
+.monty-accessible-walk summary {
+  list-style: none;
+  min-height: 35px;
+  display: flex;
+  align-items: center;
+}
+.monty-accessible-walk summary::-webkit-details-marker {
+  display: none;
+}
+.monty-accessible-walk summary::after {
+  content: '⌄';
+  padding-left: 9px;
+}
+.monty-accessible-walk[open] summary::after {
+  content: '⌃';
+}
+.monty-accessible-walk input {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #c3b58b80;
+  border-radius: 6px;
+  background: #f5e7cc;
+  color: #203b36;
+  font-size: 16px;
+}
+.monty-context {
+  gap: 8px;
+}
+.monty-platform-action .monty-context-icon {
+  border-color: #eda56f;
+  background: #784939;
+  color: #ffdfaa;
+}
+.monty-platform-action:hover:not(:disabled) .monty-context-icon {
+  background: #a25b3e;
+}
+@media (max-width: 560px) {
+  .monty-stage-toolbar {
+    top: 190px;
+    gap: 5px;
+    justify-content: flex-start;
+  }
+  .monty-door-counts {
+    flex-basis: 100%;
+    width: max-content;
+  }
+  .monty-door-counts button {
+    flex: 1;
+    padding: 8px 5px;
+  }
+  .monty-context {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    right: 95px;
+    left: 10px;
+    gap: 0;
+    padding: 9px 3px;
+  }
+  .monty-context-action {
+    width: 100%;
+    min-height: 86px;
+    font-size: 9px;
+  }
+  .monty-context-icon {
+    width: 43px;
+    height: 43px;
+  }
+  .monty-context-icon svg {
+    width: 22px;
+  }
+  .monty-context-action small {
+    font-size: 7px;
+    max-width: 55px;
+  }
+  .monty-game .world {
+    top: 275px;
+    height: calc(100% - 450px);
+  }
+}
+
+/* Keep the stage open; only the current decision earns a full control panel. */
+.monty-count-select {
+  gap: 8px;
+  color: #c8cdbb;
+  font-size: 11px;
+}
+.monty-count-select select {
+  min-height: 44px;
+  background: #20383b90;
+  border-color: #eeddb724;
+}
+.monty-context {
+  display: flex;
+  right: auto;
+  bottom: 66px;
+  padding: 0;
+  border: 0;
+  background: none;
+  box-shadow: none;
+  gap: 10px;
+}
+.monty-context:empty {
+  display: none;
+}
+.monty-context-action {
+  width: 70px;
+  min-height: 76px;
+  font-size: 11px;
+  gap: 5px;
+}
+.monty-context-icon {
+  width: 44px;
+  height: 44px;
+}
+.monty-context-icon svg {
+  width: 21px;
+  height: 21px;
+}
+.monty-context-action small {
+  display: none;
+}
+.monty-choice-panel {
+  position: absolute;
+  z-index: 7;
+  bottom: 66px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(440px, calc(100% - 32px));
+  padding: 14px 16px;
+  border: 1px solid #e6cf9a80;
+  border-radius: 16px;
+  background: #f5e7ccf5;
+  color: #304742;
+  box-shadow: 0 8px 28px #102b3040;
+}
+.monty-choice-panel p {
+  margin: 0 0 10px;
+  font-size: 13px;
+  line-height: 1.5;
+}
+.monty-choice-panel .monty-decisions {
+  gap: 10px;
+}
+.monty-choice-panel .monty-decisions button {
+  flex: 1;
+  flex-direction: column;
+  gap: 4px;
+  min-height: 56px;
+  font-size: 14px;
+  font-weight: bold;
+  background: #345d54;
+  color: #fff0cf;
+  border-color: #345d54;
+}
+.monty-choice-panel .monty-decisions button:hover:not(:disabled) {
+  background: #264a42;
+}
+.monty-choice-panel .monty-decisions button:disabled {
+  opacity: 0.48;
+  cursor: wait;
+}
+.monty-choice-panel small {
+  font-weight: normal;
+  font-size: 10px;
+}
+@media (max-width: 850px) {
+  .monty-game .learn-button {
+    padding: 10px;
+    min-width: 44px;
+    min-height: 44px;
+    justify-content: center;
+  }
+  .monty-game .learn-button span {
+    display: none;
+  }
+  .monty-game .world {
+    inset: 160px 0 190px;
+    width: 100%;
+    height: calc(100% - 350px);
+    min-height: 100px;
+  }
+  .monty-game .movement-joystick {
+    bottom: -115px;
+    right: 16px;
+  }
+  .monty-game .scene-title {
+    top: 77px;
+  }
+  .monty-game .scene-title h1 {
+    font-size: 25px;
+  }
+  .monty-game .scene-title h1 br {
+    display: none;
+  }
+  .monty-game .scene-title > p:last-child {
+    display: none;
+  }
+  .monty-game .scene-title {
+    max-width: calc(100% - 34px);
+  }
+  .monty-stage-toolbar {
+    top: 122px;
+    left: 18px;
+    right: auto;
+  }
+  .monty-count-select > span {
+    display: none;
+  }
+  .monty-count-select select {
+    padding: 4px 8px;
+    min-height: 36px;
+    font-size: 11px;
+  }
+  .monty-choice-panel {
+    left: 16px;
+    transform: none;
+    bottom: 62px;
+    width: calc(100% - 112px);
+    padding: 11px;
+  }
+  .monty-choice-panel p {
+    font-size: 11px;
+  }
+  .monty-choice-panel .monty-decisions {
+    gap: 6px;
+  }
+  .monty-choice-panel .monty-decisions button {
+    font-size: 12px;
+    padding: 8px 5px;
+  }
+  .monty-choice-panel small {
+    font-size: 8px;
+  }
+  .monty-context {
+    bottom: 65px;
+    left: 16px;
+  }
+  .monty-game:has(.monty-choice-panel) .monty-context {
+    bottom: 210px;
+  }
+}
+@media (max-height: 550px) and (min-width: 561px) {
+  .monty-game .world {
+    inset: 65px 0 100px 200px;
+    width: calc(100% - 200px);
+    height: calc(100% - 165px);
+  }
+  .monty-game .scene-title {
+    max-width: 180px;
+  }
+  .monty-stage-toolbar {
+    top: 167px;
+  }
+  .monty-choice-panel {
+    left: auto;
+    right: 105px;
+    width: 330px;
+  }
+  .monty-game .movement-joystick {
+    bottom: -35px;
+  }
+}
+.monty-game .monty-choice-panel p {
+  color: #304742;
+}
+.monty-game .scene-title h1 br::after {
+  content: ' ';
+}
+@media (max-width: 560px) {
+  .monty-game .scene-title h1 {
+    font-size: 23px;
+  }
+  .monty-stage-toolbar {
+    top: 147px;
+  }
+  .monty-game .world {
+    top: 186px;
+    height: calc(100% - 376px);
+  }
+}
+@media (max-width: 560px) {
+  .monty-choice-panel { width: calc(100% - 32px); }
+  .monty-game:has(.monty-choice-panel) .movement-joystick { bottom: 5px; }
+}
+@media (max-width: 360px) {
+  .monty-game .brand { font-size: 17px; }
+  .monty-game .topbar { left: 12px; right: 12px; gap: 6px; }
+  .monty-game .topbar-actions { gap: 3px; }
+}
