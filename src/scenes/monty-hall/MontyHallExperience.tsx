@@ -17,6 +17,7 @@ import {
   X,
   Camera,
   DoorOpen,
+  DoorClosed,
   ArrowUp,
   ArrowDown,
   SlidersHorizontal,
@@ -154,7 +155,13 @@ export default function MontyHallExperience() {
     if (level !== null) avatarLevel.current = level;
     setNearLift(level);
   }, []);
-  const [pendingDoor, setPendingDoor] = useState<number | null>(null);
+  const [pendingDoor, setPendingDoorState] = useState<number | null>(null);
+  /** Door the avatar is walking to; other doors ignore clicks until it arrives. */
+  const walkingTo = useRef<number | null>(null);
+  const setPendingDoor = useCallback((door: number | null) => {
+    walkingTo.current = door;
+    setPendingDoorState(door);
+  }, []);
   const [nearDoor, setNearDoor] = useState<number | null>(null);
 
   const [platformCommand, setPlatformCommand] = useState<{
@@ -237,6 +244,7 @@ export default function MontyHallExperience() {
   );
   const onDoor = useCallback(
     (door: number) => {
+      if (walkingTo.current !== null || liveFinale.current === 'final') return;
       const current = liveRound.current,
         currentPhase = livePhase.current;
       const pose = doorPose(door, current.count);
@@ -276,7 +284,7 @@ export default function MontyHallExperience() {
         door,
       });
     },
-    [walkTo],
+    [walkTo, setPendingDoor],
   );
   const onNearDoor = useCallback(
     (door: number | null) => setNearDoor(door),
@@ -303,7 +311,7 @@ export default function MontyHallExperience() {
         } else walkTo(point);
       }
     },
-    [walkTo],
+    [walkTo, setPendingDoor],
   );
   function restart(count = round.count) {
     const next = createRound(count);
@@ -344,7 +352,7 @@ export default function MontyHallExperience() {
       automatic: true,
       serial: Date.now(),
     });
-  }, []);
+  }, [setPendingDoor]);
   /** Opening the final door reveals the outcome: sound, score, then confetti. */
   const openFinal = useCallback(() => {
     const current = liveRound.current;
@@ -390,9 +398,10 @@ export default function MontyHallExperience() {
       clearTimeout(enter);
       clearTimeout(rest);
     };
-  }, [finale, round.final, round.count, walkTo]);
+  }, [finale, round.final, round.count, walkTo, setPendingDoor]);
   const interactDoor = useCallback(
     (door: number) => {
+      if (walkingTo.current !== null) return;
       const current = liveRound.current;
       if (livePhase.current === 'pick' && current.initial === null) {
         const next = chooseDoor(current, door);
@@ -609,7 +618,10 @@ export default function MontyHallExperience() {
           className="monty-door-count"
           disabled={phase === 'revealing' || phase === 'switch'}
         >
-          <legend className="monty-door-count-label">Doors</legend>
+          <legend className="monty-door-count-label">
+            <DoorClosed size={15} aria-hidden />
+            Doors
+          </legend>
           <div className="monty-door-count-options">
             {doorCounts.map((count) => (
               <button

@@ -87,6 +87,34 @@
 .monty-controls:focus {
   outline: none;
 }
+@media (min-width: 851px) {
+  .monty-controls {
+    align-items: stretch;
+    gap: 0;
+    border: 1px solid #8da59a60;
+    border-radius: 12px;
+    background: #17333df2;
+    box-shadow: 0 10px 30px #08191d40;
+    pointer-events: auto;
+  }
+  .monty-controls .monty-door-count,
+  .monty-controls .monty-scoreboard {
+    border: 0;
+    border-radius: 0;
+    background: none;
+    box-shadow: none;
+  }
+  .monty-controls .monty-scoreboard {
+    border-top: 1px solid #8da59a40;
+  }
+  .monty-controls .monty-scoreboard table {
+    width: calc(100% - 24px);
+  }
+  .monty-controls .monty-door-count-options {
+    flex: 1;
+    justify-content: flex-end;
+  }
+}
 .monty-controls-header,
 .monty-drawer-toggle,
 .monty-drawer-scrim {
@@ -113,6 +141,16 @@
   font-size: 11px;
   letter-spacing: 0.14em;
   text-transform: uppercase;
+}
+.monty-door-count-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+}
+.monty-door-count-label svg {
+  flex: none;
+  color: #e6ba74;
 }
 .monty-door-count-options {
   display: flex;
