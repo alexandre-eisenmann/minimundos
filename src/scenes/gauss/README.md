@@ -4,7 +4,7 @@ An illustrative Braunschweig schoolroom around 1786. The room begins at recess, 
 
 Orbit the classroom, hover over a slate with the inspection lens, and click to inspect its work. Student buttons provide keyboard and touch access to every slate. Escape closes the inspector. The pairing activity includes odd-length sums and their unpaired middle term.
 
-The six classmates and their calculations are fictional, plausible contrasting methods. Running totals and columns are valid techniques; the slates now show specific arithmetic slips, restarts, and one invalid assumption that every group of five has the same sum. Crossed-out marks distinguish these attempts from corrected work. Gauss's slate shows 50 pairs of 101, giving 5050.
+The nine classmates and their calculations are fictional, plausible contrasting methods. Running totals, columns, reverse addition, grouping by tens, and remembered formulae are valid techniques; the slates now show specific arithmetic slips, restarts, and one invalid assumption that every group of five has the same sum. Crossed-out marks distinguish these attempts from corrected work. Gauss's slate shows 50 pairs of 101, giving 5050.
 
 Historical distinction: Wolfgang Sartorius von Waltershausen's _Gauss zum Gedächtniss_ (1856) recounts a school arithmetic anecdote long after the event. The popular 1-to-100 assignment and explicit pairing explanation belong to later retellings; this scene does not assert they were documented in the classroom. See the [MacTutor Gauss biography](https://mathshistory.st-andrews.ac.uk/Biographies/Gauss/).
 

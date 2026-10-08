@@ -89,7 +89,7 @@
   overflow: hidden;
   border: 1px solid #d4cfbf;
   border-radius: 14px;
-  background: #e6dfd0;
+  background: #d4c7af;
   box-shadow: 0 12px 45px #51422c0d;
 }
 .gauss-stage canvas {
@@ -826,7 +826,7 @@
   margin: 0;
   padding: 0;
   overflow: hidden;
-  background: #e6dfd0;
+  background: #d4c7af;
 }
 .gauss-stage {
   position: absolute;

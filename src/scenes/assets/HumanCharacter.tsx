@@ -67,15 +67,21 @@ export function HumanCharacter({
   phase = 0,
   traveller = false,
   coat,
+  hair,
+  pose = 'stand',
 }: {
   variant?: number;
   motion?: RefObject<number>;
   phase?: number;
   traveller?: boolean;
   coat?: string;
+  hair?: string;
+  pose?: 'stand' | 'sit';
 }) {
   const palette = palettes[variant % palettes.length];
   const jacket = coat ?? palette.coat;
+  const locks = hair ?? palette.hair;
+  const seated = pose === 'sit';
   const body = useRef<THREE.Group>(null),
     head = useRef<THREE.Group>(null);
   const eyes = useRef<THREE.Group>(null);
@@ -84,6 +90,29 @@ export function HumanCharacter({
   const blend = useRef(0);
   useFrame(({ clock }, delta) => {
     const t = clock.elapsedTime + phase;
+    const blink = t % 4.9;
+    if (eyes.current)
+      eyes.current.scale.y =
+        blink < 0.14 ? Math.max(0.08, Math.abs(blink - 0.07) / 0.07) : 1;
+    if (seated) {
+      if (body.current) {
+        body.current.position.y = -0.012;
+        body.current.position.z = 0.03;
+        body.current.rotation.x = 0.18;
+        body.current.rotation.z = 0;
+      }
+      arms.current.forEach((limb, i) => {
+        if (!limb) return;
+        limb.rotation.x = i ? -1.08 + Math.sin(t * 3.1) * 0.05 : -0.42;
+        limb.rotation.z = i ? 0.08 : -0.04;
+      });
+      if (head.current) {
+        head.current.rotation.x = 0.32 + Math.sin(t * 0.7) * 0.028;
+        head.current.rotation.y = Math.sin(t * 0.48) * 0.07;
+        head.current.rotation.z = Math.sin(t * 0.9) * 0.02;
+      }
+      return;
+    }
     blend.current = THREE.MathUtils.damp(
       blend.current,
       motion?.current ?? 0,
@@ -106,26 +135,52 @@ export function HumanCharacter({
       head.current.rotation.y = Math.sin(t * 0.67) * 0.09 * (1 - blend.current);
       head.current.rotation.z = Math.sin(t * 0.9) * 0.025;
     }
-    const blink = t % 4.9;
-    if (eyes.current)
-      eyes.current.scale.y =
-        blink < 0.14 ? Math.max(0.08, Math.abs(blink - 0.07) / 0.07) : 1;
   });
   return (
     <group name={`human-${traveller ? 'traveller' : variant}`}>
-      {[-1, 1].map((side, i) => (
-        <group
-          key={side}
-          ref={(el) => {
-            legs.current[i] = el;
-          }}
-          position={[side * 0.082, 0.29, 0]}
-        >
-          <Form p={[0, -0.09, 0]} s={[0.066, 0.145, 0.075]} c="#38434a" />
-          <Form p={[0, -0.235, 0.038]} s={[0.083, 0.052, 0.121]} c="#302b2a" />
-          <Form p={[0, -0.208, 0.002]} s={[0.073, 0.059, 0.079]} c="#594033" />
-        </group>
-      ))}
+      {seated
+        ? [-1, 1].map((side) => (
+            <group key={side} position={[side * 0.075, 0.25, 0.018]}>
+              <Form
+                p={[0, -0.018, 0.068]}
+                s={[0.07, 0.052, 0.118]}
+                c="#38434a"
+                r={[0.18, 0, 0]}
+              />
+              <Form
+                p={[0, -0.125, 0.148]}
+                s={[0.06, 0.118, 0.058]}
+                c="#38434a"
+              />
+              <Form
+                p={[0, -0.228, 0.168]}
+                s={[0.08, 0.048, 0.112]}
+                c="#302b2a"
+              />
+              <Form p={[0, -0.2, 0.132]} s={[0.068, 0.05, 0.072]} c="#594033" />
+            </group>
+          ))
+        : [-1, 1].map((side, i) => (
+            <group
+              key={side}
+              ref={(el) => {
+                legs.current[i] = el;
+              }}
+              position={[side * 0.082, 0.29, 0]}
+            >
+              <Form p={[0, -0.09, 0]} s={[0.066, 0.145, 0.075]} c="#38434a" />
+              <Form
+                p={[0, -0.235, 0.038]}
+                s={[0.083, 0.052, 0.121]}
+                c="#302b2a"
+              />
+              <Form
+                p={[0, -0.208, 0.002]}
+                s={[0.073, 0.059, 0.079]}
+                c="#594033"
+              />
+            </group>
+          ))}
       <group ref={body}>
         <Form p={[0, 0.443, 0]} s={[0.18, 0.224, 0.126]} c={jacket} />
         <Form
@@ -220,7 +275,7 @@ export function HumanCharacter({
                 <Form
                   p={[side * 0.079, 0.898 + (side === 1 ? 0.007 : 0), 0.151]}
                   s={[0.056, 0.014, 0.018]}
-                  c={palette.hair}
+                  c={locks}
                   r={[0, 0, side * -0.12]}
                 />
               </group>
@@ -257,21 +312,17 @@ export function HumanCharacter({
               c={palette.skin}
             />
             <Smile />
-            <Form
-              p={[0, 0.96, -0.038]}
-              s={[0.205, 0.098, 0.167]}
-              c={palette.hair}
-            />
+            <Form p={[0, 0.96, -0.038]} s={[0.205, 0.098, 0.167]} c={locks} />
             <Form
               p={[-0.109, 0.939, 0.073]}
               s={[0.101, 0.055, 0.093]}
-              c={palette.hair}
+              c={locks}
               r={[0, 0, 0.35]}
             />
             <Form
               p={[0.05, 0.971, 0.078]}
               s={[0.137, 0.06, 0.09]}
-              c={palette.hair}
+              c={locks}
               r={[0, 0, -0.2]}
             />
             {[-1, 1].map((side) => (
@@ -279,14 +330,14 @@ export function HumanCharacter({
                 key={side}
                 p={[side * 0.182, 0.876, -0.015]}
                 s={[0.026, 0.076, 0.084]}
-                c={palette.hair}
+                c={locks}
               />
             ))}
             {variant % 3 === 1 && (
               <Form
                 p={[0, 0.936, -0.176]}
                 s={[0.101, 0.092, 0.075]}
-                c={palette.hair}
+                c={locks}
               />
             )}
             {variant % 3 === 2 &&
@@ -295,7 +346,7 @@ export function HumanCharacter({
                   key={side}
                   p={[side * 0.036, 0.758, 0.177]}
                   s={[0.042, 0.019, 0.019]}
-                  c={palette.hair}
+                  c={locks}
                   r={[0, 0, side * 0.18]}
                 />
               ))}

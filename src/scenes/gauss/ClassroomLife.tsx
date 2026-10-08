@@ -20,7 +20,11 @@ function Child({ index, phase }: { index: number; phase: ClassroomPhase }) {
     [],
   );
   const s = students[index];
-  const start: [number, number, number] = [-4.2 + index * 1.55, 0, 3.5];
+  const start: [number, number, number] = [
+    ((index % 3) - 1) * 2.6,
+    0,
+    3.4 + Math.floor(index / 3) * 0.4,
+  ];
   useFrame(({ clock }, dt) => {
     if (!group.current) return;
     if (phase === 'recess') {
@@ -29,19 +33,21 @@ function Child({ index, phase }: { index: number; phase: ClassroomPhase }) {
       const t = reduced
         ? index
         : clock.elapsedTime * (0.65 + index * 0.07) + index * 1.8;
-      const aisle = [-4.2, -1.4, 1.4, 4.2, -1.4, 1.4][index];
+      const aisle = [-4.25, -3.15, -2.05, -0.85, 0.25, 1.45, 2.65, 3.75, 4.45][
+        index
+      ];
       group.current.position.set(
         aisle + Math.sin(t * 0.7) * 0.09,
         0,
-        0.25 + Math.sin(t) * 3.2,
+        0.15 + Math.sin(t + index * 0.7) * 2.9,
       );
       group.current.rotation.y = Math.cos(t) > 0 ? 0 : Math.PI;
       motion.current = reduced ? 0 : 0.7;
     } else {
       elapsed.current += Math.min(dt, 0.05);
       const waypoints = [
-        [group.current.position.x, 3.5],
-        [s.x + 1.17, 3.5],
+        [group.current.position.x, 4.4],
+        [s.x + 1.17, 4.4],
         [s.x + 1.17, s.z + 0.8],
         [s.x, s.z + 0.8],
       ];
@@ -149,8 +155,8 @@ export function ClassroomLife({ phase }: { phase: ClassroomPhase }) {
     <>
       {phase !== 'challenge' &&
         students.map((_, i) => <Child key={i} index={i} phase={phase} />)}
-      {Array.from({ length: 5 }, (_, i) => (
-        <FlyingPaper key={i} index={i} ball={i > 1} phase={phase} />
+      {Array.from({ length: 7 }, (_, i) => (
+        <FlyingPaper key={i} index={i} ball={i > 2} phase={phase} />
       ))}
     </>
   );
@@ -182,8 +188,8 @@ export function Explorer({
           Math.hypot(g.position.x - s.x, g.position.z - s.z) < 2
             ? []
             : [
-                new Vector3(g.position.x, 0, 3.5),
-                new Vector3(s.x + 1.3, 0, 3.5),
+                new Vector3(g.position.x, 0, 4.4),
+                new Vector3(s.x + 1.3, 0, 4.4),
                 new Vector3(s.x + 1.3, 0, s.z + 0.1),
               ];
       }
@@ -219,7 +225,7 @@ export function Explorer({
     }
   });
   return (
-    <group ref={group} position={[4.8, 0, 3.5]} scale={1.7}>
+    <group ref={group} position={[4.9, 0, 4.35]} scale={1.7}>
       <HumanCharacter traveller variant={4} coat="#b28a47" motion={motion} />
       <group position={[-0.3, 0.78, 0.3]} rotation={[0, 0.2, -0.18]}>
         <mesh>

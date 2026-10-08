@@ -37,7 +37,7 @@ Bridges remain traversable after use. The crossing log includes repeated bridge 
 - `/scenes/konigsberg`: the complete Königsberg experience. Direct links and refreshes work in Vite and GitHub Pages.
 - `/scenes/brachistochrone`: Bernoulli’s 1696 challenge in an illustrative workshop.
 - `/scenes/monty-hall`: a 1975 studio inspired by Selvin’s probability puzzle. Play with up to 50 doors, pull the stage lever to expand the show, ride the lift between stacked galleries, choose whether to switch, explore the opened booths, and compare strategies in the learning journal. After the goat reveal, explicit Keep and Switch buttons resolve the round. See `src/scenes/monty-hall/README.md` for historical sources and mathematical assumptions.
-- `/scenes/gauss`: an illustrative schoolroom of young Gauss. Inspect six students’ slates with a magnifier and explore the pairing proof for sums from 1 to 100.
+- `/scenes/gauss`: an illustrative schoolroom of young Gauss. Inspect nine students’ slates with a magnifier and explore the pairing proof for sums from 1 to 100.
 - Unregistered paths show a world-not-found page with a link to the index.
 
 To add a minimundo, create a self-contained experience component with a default export and add an entry to `src/scenes/registry.ts` with a unique slug and `/scenes/<slug>` path, title, learning objective, and dynamic component import. The entry automatically appears in the index and becomes a route. Keep scene-specific state inside its experience component and reusable assets in `src/scenes/assets`. The component is loaded only when its URL is opened. Use ordinary links between worlds so browser history and opening in new tabs work naturally.

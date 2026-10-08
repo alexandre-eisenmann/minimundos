@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { canExplore, closestSlate } from './classroomMotion.ts';
 import { students } from './students.ts';
 void test('explorer stays in the classroom and cannot walk through occupied desks', () => {
-  assert.ok(canExplore(4.8, 3.5));
+  assert.ok(canExplore(4.9, 4.35));
   for (const [x, z] of [
     [-5, 0],
     [6, 0],
@@ -17,7 +17,7 @@ void test('explorer stays in the classroom and cannot walk through occupied desk
   }
 });
 void test('every slate has an accessible inspection position and the entrance has none', () => {
-  assert.equal(closestSlate(4.8, 3.5), null);
+  assert.equal(closestSlate(4.9, 4.35), null);
   students.forEach((s, i) =>
     assert.equal(closestSlate(s.x + 1.3, s.z + 0.1), i),
   );

@@ -8,6 +8,9 @@ export const crossedLines: Record<string, readonly number[]> = {
   groups: [4, 5],
   counting: [9],
   pairs: [],
+  reverse: [3],
+  tens: [3],
+  formula: [0, 4],
 };
 let fontLoading: Promise<unknown> | undefined;
 function loadChalkFonts() {
