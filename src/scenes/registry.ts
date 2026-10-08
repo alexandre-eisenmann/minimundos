@@ -11,6 +11,9 @@ if (!brachistochrone)
 const montyHall = sceneManifest.find((scene) => scene.slug === 'monty-hall');
 if (!montyHall) throw new Error('Monty Hall scene metadata is missing');
 
+const gauss = sceneManifest.find((scene) => scene.slug === 'gauss');
+if (!gauss) throw new Error('Gauss scene metadata is missing');
+
 /** Each scene can be developed and linked independently before an atlas exists. */
 export const sceneRegistry = [
   {
@@ -39,5 +42,16 @@ export const sceneRegistry = [
       'An illustrative 1970s studio inspired by Let’s Make a Deal and Steve Selvin’s 1975 puzzle; generalized door counts are educational extensions.',
     ...montyHall,
     component: () => import('./monty-hall/MontyHallExperience'),
+  },
+  {
+    id: 'gauss-schoolroom-1786',
+    version: 1,
+    seed: 1786,
+    period: 'c. 1786',
+    location: 'Braunschweig, German lands',
+    historicalNote:
+      'An illustrative classroom inspired by the later Gauss schoolboy anecdote; the familiar 1-to-100 task is not an eyewitness account.',
+    ...gauss,
+    component: () => import('./gauss/GaussExperience'),
   },
 ];

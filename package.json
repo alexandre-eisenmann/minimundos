@@ -13,7 +13,7 @@
     "lint": "oxlint",
     "format": "oxfmt",
     "preview": "vite preview",
-    "test": "node --experimental-strip-types --test src/game/*.test.ts src/scenes/brachistochrone/*.test.ts src/scenes/monty-hall/*.test.ts"
+    "test": "node --experimental-strip-types --test src/game/*.test.ts src/scenes/brachistochrone/*.test.ts src/scenes/monty-hall/*.test.ts src/scenes/gauss/*.test.ts"
   },
   "dependencies": {
     "@base-ui/react": "1.7.0",

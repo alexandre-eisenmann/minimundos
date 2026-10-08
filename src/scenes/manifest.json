@@ -13,7 +13,10 @@
     "atlas": {
       "title": "Seven bridges. One impossible walk?",
       "place": "Königsberg, Prussia",
-      "subjects": ["Mathematics", "History"],
+      "subjects": [
+        "Mathematics",
+        "History"
+      ],
       "question": "Can you cross every bridge exactly once?",
       "description": "Wander a river city, trace your own route, and discover the deceptively simple puzzle that opened a new branch of mathematics.",
       "image": "/konigsberg-atlas.png",
@@ -34,7 +37,11 @@
     "atlas": {
       "title": "The fastest way isn’t the straightest.",
       "place": "Groningen, Dutch Republic",
-      "subjects": ["Mathematics", "Physics", "History"],
+      "subjects": [
+        "Mathematics",
+        "Physics",
+        "History"
+      ],
       "question": "Which curve wins the race to the bottom?",
       "description": "Step into an imagined workshop inspired by Bernoulli’s 1696 challenge. Shape a track, release the riders, and put your intuition to the test.",
       "image": "/brachistochrone-atlas.png",
@@ -55,11 +62,40 @@
     "atlas": {
       "title": "The door you didn’t choose.",
       "place": "Hollywood, California",
-      "subjects": ["Mathematics", "Probability", "History"],
+      "subjects": [
+        "Mathematics",
+        "Probability",
+        "History"
+      ],
       "question": "Would you keep your door, or switch?",
       "description": "You’re on the air in an imagined 1975 studio. Pick a door, let the host reveal the goats, and test your intuition. Then go backstage, pull the lever, and ride a lift through a right-triangle studio of up to 55 doors.",
       "image": "/monty-hall-atlas.jpg",
       "imageAlt": "The playable miniature Monty Hall studio: colourful closed doors, warm marquee bulbs, television cameras and a costumed audience."
+    }
+  },
+  {
+    "slug": "gauss",
+    "path": "/scenes/gauss",
+    "title": "Young Gauss and the hundred numbers",
+    "learningObjective": "Discover the pairing pattern behind 1 + 2 + … + 100 and prove the sum of the first n positive integers.",
+    "social": {
+      "title": "MiniMundos · Young Gauss",
+      "description": "Look through a magnifier at a classroom full of arithmetic and discover one elegant idea.",
+      "image": "/gauss-atlas.png",
+      "imageAlt": "A miniature schoolroom with wooden desks and students working on chalk slates."
+    },
+    "atlas": {
+      "title": "A hundred numbers. One little idea.",
+      "place": "Braunschweig, German lands",
+      "subjects": [
+        "Mathematics",
+        "Patterns",
+        "History"
+      ],
+      "question": "Can you find a shortcut hiding in the numbers?",
+      "description": "Visit an imagined schoolroom of young Gauss. Inspect the students’ slates with a magnifier, compare their methods, and discover how pairing the ends turns a hundred numbers into one elegant calculation.",
+      "image": "/gauss-atlas.png",
+      "imageAlt": "The playable miniature Gauss classroom with six pupils, wooden desks, tall windows, and a chalkboard arithmetic challenge."
     }
   }
 ]
